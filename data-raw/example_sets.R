@@ -1,41 +1,27 @@
 ## code to prepare `example_sets` dataset goes here
 
-usethis::use_data(example_sets)
+library(DBI)
+library(odbc)
+library(tidyverse)
 
-example_sets <- data.frame(stringsAsFactors=FALSE,
-                           date = c("2010-06-01", "2010-06-01", "2010-06-01", "2010-06-01",
-                                    "2010-06-01", "2010-06-01", "2011-06-15",
-                                    "2011-06-15", "2011-06-15", "2011-06-15",
-                                    "2011-06-15", "2011-06-15", "2012-06-05",
-                                    "2012-06-05", "2012-06-05", "2012-06-05",
-                                    "2012-06-05", "2012-06-05", "2010-06-01", "2010-06-01",
-                                    "2010-06-01", "2010-06-01", "2010-06-01",
-                                    "2010-06-01", "2011-06-15", "2011-06-15",
-                                    "2011-06-15", "2011-06-15", "2011-06-15",
-                                    "2011-06-15", "2012-06-05", "2012-06-05",
-                                    "2012-06-05", "2012-06-05", "2012-06-05", "2012-06-05"),
-                         set_id = c("SET1", "SET1", "SET1", "SET1", "SET1", "SET1", "SET1",
-                                    "SET1", "SET1", "SET1", "SET1", "SET1",
-                                    "SET1", "SET1", "SET1", "SET1", "SET1", "SET1",
-                                    "SET2", "SET2", "SET2", "SET2", "SET2",
-                                    "SET2", "SET2", "SET2", "SET2", "SET2", "SET2",
-                                    "SET2", "SET2", "SET2", "SET2", "SET2", "SET2",
-                                    "SET2"),
-                   arm_position = c("a", "a", "a", "b", "b", "b", "a", "a", "a", "b", "b", "b",
-                                    "a", "a", "a", "b", "b", "b", "a", "a",
-                                    "a", "b", "b", "b", "a", "a", "a", "b", "b",
-                                    "b", "a", "a", "a", "b", "b", "b"),
-                     pin_number = c("pin_1", "pin_2", "pin_3", "pin_1", "pin_2", "pin_3",
-                                    "pin_1", "pin_2", "pin_3", "pin_1",
-                                    "pin_2", "pin_3", "pin_1", "pin_2", "pin_3",
-                                    "pin_1", "pin_2", "pin_3", "pin_1", "pin_2",
-                                    "pin_3", "pin_1", "pin_2", "pin_3", "pin_1",
-                                    "pin_2", "pin_3", "pin_1", "pin_2", "pin_3",
-                                    "pin_1", "pin_2", "pin_3", "pin_1", "pin_2",
-                                    "pin_3"),
-                     pin_height = c(100, 106, 118, 110, 125, 115, 105, 113, 120, 117, 128, 118,
-                                    112, 120, 124, 125, 123, 130, 142, 148,
-                                    160, 152, 167, 157, 147, 155, 162, 159, 170,
-                                    160, 154, 162, 166, 167, 165, 172)
-                )
+# Set up connection variables
+database_server <- "inp2300irmadb01.nps.doi.net\\ntwk"
+database_name <- "SET"
+database_driver <- "ODBC Driver 17 for SQL Server"
 
+# Build a new connection and connect to the database server
+con <- DBI::dbConnect(odbc::odbc(),
+                      Driver = database_driver,
+                      Server = database_server,
+                      Database = "SET",
+                      Trusted_Connection = "Yes",
+                      Port = 1433)
+
+usethis::use_data(example_sets, overwrite = T)
+
+example_sets <- dbGetQuery(con, 'SELECT * FROM ssrs.vw_dbx_SET_data_FINAL') %>%
+    filter(network_code == "NCBN" & observation_type == "Standard") %>%
+    select(event_date_UTC, network_code, park_code, station_name, SET_direction, pin_position, pin_height_mm) %>%
+    filter(park_code == "ASIS" & station_name == "M11-1")
+
+DBI::dbDisconnect(con)
