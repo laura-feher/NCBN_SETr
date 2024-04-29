@@ -21,7 +21,7 @@ usethis::use_data(example_sets, overwrite = T)
 
 example_sets <- dbGetQuery(con, 'SELECT * FROM ssrs.vw_dbx_SET_data_FINAL') %>%
     filter(network_code == "NCBN" & observation_type == "Standard") %>%
-    select(event_date_UTC, network_code, park_code, station_name, SET_direction, pin_position, pin_height_mm) %>%
-    filter(park_code == "ASIS" & station_name == "M11-1")
+    select(event_date_UTC, network_code, park_code, station_code, SET_direction, pin_position, pin_height_mm) %>%
+    filter(park_code == "ASIS" & station_code == "M11-1")
 
 DBI::dbDisconnect(con)
