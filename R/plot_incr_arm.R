@@ -1,6 +1,6 @@
-#' Plot change between readings, by arm
+#' Plot change between readings, by SET_direction (i.e., arm)
 #'
-#' @param data data frame (e.g. `$arm` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: date, set_id, arm_position, mean_incr. `mean_incr` should be an already-calculated field of change since previous reading
+#' @param data data frame (e.g. the `$arm` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, set_id, SET_direction, mean_incr. `mean_incr` should be an already-calculated field of change since previous reading
 #' @param set optional SET ID if you only want to look at one SET; default is to graph all SETs
 #' @param threshold numeric value for red horizontal lines (at +/- this value); this should be a value that would be a meaningful threshold for incremental change.
 #' @param columns number of columns for faceted output
@@ -12,13 +12,16 @@
 #'
 #' @examples
 #' incr_set <- calc_change_incr(example_sets)
-#' plot_incr_arm(incr_set$arm)
-#' plot_incr_arm(incr_set$arm, threshold = 5, columns = 1)
-#' plot_incr_arm(incr_set$arm, set = "SET2", threshold = 5)
+#' plot_incr_arm(incr_set)
+#' plot_incr_arm(incr_set, threshold = 5, columns = 1)
+#' plot_incr_arm(incr_set, set = "SET2", threshold = 5)
 
 
 plot_incr_arm <- function(data, set = NULL, threshold = 25, columns = 4,
                           pointsize = 2, scales = "fixed"){
+
+    data <- data$arm
+
     # data needs to be the $arm piece of the output from calc_change_inc
     if(is.null(set)){
         to_plot <- data
@@ -26,13 +29,13 @@ plot_incr_arm <- function(data, set = NULL, threshold = 25, columns = 4,
     }
     else{
         to_plot <- data %>%
-            dplyr::filter(.data$set_id == !!set)
-        plot_title <- paste('Incremental Change by arm at', set)
+            dplyr::filter(set_id == !!set)
+        plot_title <- paste('Incremental Change by SET direction at', set)
     }
 
-    ggplot2::ggplot(data = to_plot, ggplot2::aes(x = .data$date,
-                                          y = .data$mean_incr,
-                                          color = as.factor(.data$arm_position))) +
+    ggplot2::ggplot(data = to_plot, ggplot2::aes(x = event_date_UTC,
+                                          y = mean_incr,
+                                          color = as.factor(SET_direction))) +
         ggplot2::geom_point(size = pointsize) +
         ggplot2::geom_hline(yintercept = threshold, col = "red", size = 1) +
         ggplot2::geom_hline(yintercept = -1*threshold, col = "red", size = 1) +
@@ -41,7 +44,7 @@ plot_incr_arm <- function(data, set = NULL, threshold = 25, columns = 4,
              subtitle = paste('red lines at +/-', threshold, 'mm'),
              x = 'Date',
              y = 'Change since previous reading (mm)',
-             color = 'Arm Position') +
+             color = 'SET direction') +
         ggplot2::theme_bw() +
         ggplot2::theme(legend.position = 'bottom')
 }
