@@ -17,11 +17,12 @@ con <- DBI::dbConnect(odbc::odbc(),
                       Trusted_Connection = "Yes",
                       Port = 1433)
 
-usethis::use_data(example_sets, overwrite = T)
 
 example_sets <- dbGetQuery(con, 'SELECT * FROM ssrs.vw_dbx_SET_data_FINAL') %>%
     filter(network_code == "NCBN" & observation_type == "Standard") %>%
-    select(event_date_UTC, network_code, park_code, station_code, SET_direction, pin_position, pin_height_mm) %>%
-    filter(park_code == "ASIS" & station_code == "M11-1")
+    select(event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm) %>%
+    filter(park_code == "ASIS" & site_name == "Marsh 11")
+
+usethis::use_data(example_sets, overwrite = T)
 
 DBI::dbDisconnect(con)
