@@ -17,6 +17,7 @@ calc_set_rates <- function(data) {
                ci = map(set_lm_model, ~as.data.frame(confint(., parm = c("date_num"), level = 0.95))),
                ci_low = map_dbl(ci, ~.$`2.5 %`),
                ci_high =  map_dbl(ci, ~.$`97.5 %`),
-               ci_abs_value = abs(ci_high - set_rate)
+               ci_abs_value = abs(ci_high - set_rate),
+               ci_high =  map_dbl(ci, ~.$`97.5 %`)
                )
 }
