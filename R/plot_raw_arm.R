@@ -1,6 +1,6 @@
 #' Plot raw pin measurements, first averaged to SET_direction level, by date
 #'
-#' @param data a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, station_code, SET_direction, pin_height_mm
+#' @param data a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_height_mm
 #' @param columns number of columns for the faceted graph
 #' @param pointsize size of points for `geom_point()` layer
 #' @param sdline logical; include error bars for +/- one standard deviation?
@@ -17,8 +17,7 @@
 
 plot_raw_arm <- function(data, columns = 4, pointsize = 2, sdline = TRUE, sdlinesize = 1, scales = "free_y"){
     data %>%
-        dplyr::mutate(set_id = paste(network_code, park_code, station_code, sep = "_")) %>%
-        dplyr::group_by(set_id, SET_direction, event_date_UTC) %>%
+        dplyr::group_by(network_code, park_code, site_name, station_code, SET_direction, event_date_UTC) %>%
         dplyr::summarize(mean = mean(pin_height_mm, na.rm = TRUE),
                   sd = stats::sd(pin_height_mm, na.rm = TRUE)) %>%
         ggplot2::ggplot(ggplot2::aes(x = event_date_UTC, y = mean, color = as.factor(SET_direction))) +
@@ -31,7 +30,7 @@ plot_raw_arm <- function(data, columns = 4, pointsize = 2, sdline = TRUE, sdline
         ),
         size = sdlinesize
         )} +
-        ggplot2::facet_wrap(~set_id, ncol = columns, scales = scales) +
+        ggplot2::facet_wrap(~station_code, ncol = columns, scales = scales) +
         ggplot2::labs(title = 'Pin Height (raw measurement; averaged to SET direction level)',
              x = 'Date',
              y = 'Mean pin height (mm)',

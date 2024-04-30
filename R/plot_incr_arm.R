@@ -1,6 +1,6 @@
 #' Plot change between readings, by SET_direction (i.e., arm)
 #'
-#' @param data data frame (e.g. the `$arm` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, set_id, SET_direction, mean_incr. `mean_incr` should be an already-calculated field of change since previous reading
+#' @param data data frame (e.g. the `$arm` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, mean_incr. `mean_incr` should be an already-calculated field of change since previous reading
 #' @param set optional SET ID if you only want to look at one SET; default is to graph all SETs
 #' @param threshold numeric value for red horizontal lines (at +/- this value); this should be a value that would be a meaningful threshold for incremental change.
 #' @param columns number of columns for faceted output
@@ -29,7 +29,7 @@ plot_incr_arm <- function(data, set = NULL, threshold = 25, columns = 4,
     }
     else{
         to_plot <- data %>%
-            dplyr::filter(set_id == !!set)
+            dplyr::filter(station_code == !!set)
         plot_title <- paste('Incremental Change by SET direction at', set)
     }
 
@@ -39,7 +39,7 @@ plot_incr_arm <- function(data, set = NULL, threshold = 25, columns = 4,
         ggplot2::geom_point(size = pointsize) +
         ggplot2::geom_hline(yintercept = threshold, col = "red", size = 1) +
         ggplot2::geom_hline(yintercept = -1*threshold, col = "red", size = 1) +
-        ggplot2::facet_wrap(~set_id, ncol = columns, scales = scales) +
+        ggplot2::facet_wrap(~station_code, ncol = columns, scales = scales) +
         ggplot2::labs(title = plot_title,
              subtitle = paste('red lines at +/-', threshold, 'mm'),
              x = 'Date',

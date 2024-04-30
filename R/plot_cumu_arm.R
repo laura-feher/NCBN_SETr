@@ -20,11 +20,11 @@ plot_cumu_arm <- function(data, columns = 4, pointsize = 2, scales = "fixed") {
     ggplot2::ggplot(data, ggplot2::aes(x = event_date_UTC, y = mean_cumu, col = as.factor(SET_direction))) +
         ggplot2::geom_point(size = pointsize) +
         ggplot2::geom_line() +
-        ggplot2::facet_wrap(~set_id, ncol = columns, scales = scales) +
+        ggplot2::facet_wrap(~station_code, ncol = columns, scales = scales) +
         ggplot2::labs(title = 'Cumulative Change by arm position',
              x = 'Date',
              y = 'Change since first reading (mm)',
-             color = "Arm Position") +
+             color = "SET direction") +
         ggplot2::theme_bw() +
         ggplot2::theme(legend.position = 'bottom')
 }

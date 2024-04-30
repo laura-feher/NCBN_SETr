@@ -1,6 +1,6 @@
 #' Plot change between readings, by pin
 #'
-#' @param data data frame (e.g. the `$pin` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, set_id, SET_direction, pin_positionr, incr. `incr` should be an already-calculated field of change since previous reading.
+#' @param data data frame (e.g. the `$pin` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_positionr, incr. `incr` should be an already-calculated field of change since previous reading.
 #' @param set SET ID to graph (required)
 #' @param threshold numeric value for red horizontal lines (at +/- this value); this should be a value that would be a meaningful threshold for incremental change.
 #' @param columns number of columns for faceted output
@@ -12,9 +12,9 @@
 #'
 #' @examples
 #' incr_set <- calc_change_incr(example_sets)
-#' plot_incr_pin(incr_set, set = "NCBN_ASIS_M11-1")
-#' plot_incr_pin(incr_set, set = "NCBN_ASIS_M11-1", threshold = 5)
-#' plot_incr_pin(incr_set, set = "NCBN_ASIS_M11-1", threshold = 5, columns = 1)
+#' plot_incr_pin(incr_set, set = "M11-1")
+#' plot_incr_pin(incr_set, set = "M11-1", threshold = 5)
+#' plot_incr_pin(incr_set, set = "M11-1", threshold = 5, columns = 1)
 
 plot_incr_pin <- function(data, set, threshold = 25, columns = 2, pointsize = 2, scales = "fixed"){
 
@@ -23,7 +23,7 @@ plot_incr_pin <- function(data, set, threshold = 25, columns = 2, pointsize = 2,
     # data needs to be the $pin piece of the output from calc_change_inc
     # names in arguments default to columns used in SETr project
     # WHY ISN'T IT SCREAMING ABOUT NO GLOBAL BINDING FOR ARM POSITION (in facet)
-    ggplot2::ggplot(data = dplyr::filter(data, set_id == !!set),
+    ggplot2::ggplot(data = dplyr::filter(data, station_code == !!set),
                     ggplot2::aes(x = event_date_UTC, y = incr,
                color = as.factor(pin_position))) +
         ggplot2::geom_point(size = pointsize) +

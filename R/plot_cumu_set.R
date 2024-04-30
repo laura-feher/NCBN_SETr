@@ -26,7 +26,7 @@ plot_cumu_set <- function(data, columns = 4, pointsize = 3.5, scales = "fixed", 
         ggplot2::geom_point(shape = 21,
                    fill = 'lightsteelblue1', col = 'steelblue3',
                    size = pointsize, alpha = 0.9) +
-        ggplot2::facet_wrap(~set_id, ncol = columns, scales = scales) +
+        ggplot2::facet_wrap(~station_code, ncol = columns, scales = scales) +
         {if(smooth) ggplot2::labs(title = 'Cumulative Change since first reading',
                          x = 'Date',
                          y = 'Change since first reading (mm)')} +

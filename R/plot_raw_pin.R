@@ -1,6 +1,6 @@
 #' Plot raw pin readings for a single SET, faceted by SET direction
 #'
-#' @param data a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, station_code, SET_direction, pin_height_mm
+#' @param data a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_height_mm
 #' @param set character string for the SET you wish to examine
 #' @param columns number of columns to include in faceted graph
 #' @param pointsize size of points; passed to `geom_point()`
@@ -10,15 +10,14 @@
 #' @export
 #'
 #' @examples
-#' plot_raw_pin(example_sets, "NCBN_ASIS_M11-1")
-#' plot_raw_pin(example_sets, "NCBN_ASIS_M11-1", columns = 1, pointsize = 4)
-#' plot_raw_pin(example_sets, "NCBN_ASIS_M11-1", scales = "free_y")
+#' plot_raw_pin(example_sets, set = "M11-1")
+#' plot_raw_pin(example_sets, "M11-1", columns = 1, pointsize = 4)
+#' plot_raw_pin(example_sets, "M11-1", scales = "free_y")
 
 plot_raw_pin <- function(data, set, columns = 2, pointsize = 2, scales = "fixed"){
     data %>%
-        dplyr::mutate(set_id = paste(network_code, park_code, station_code, sep = "_")) %>%
-        dplyr::filter(set_id == !!set) %>%
-        dplyr::group_by(set_id, SET_direction, pin_position, event_date_UTC) %>%
+        dplyr::filter(station_code == !!set) %>%
+        dplyr::group_by(network_code, park_code, site_name, station_code, SET_direction, pin_position, event_date_UTC) %>%
         ggplot2::ggplot(ggplot2::aes(x = event_date_UTC, y = pin_height_mm, col = as.factor(pin_position))) +
         ggplot2::geom_point(size = pointsize) +
         ggplot2::geom_line(alpha = 0.6) +
