@@ -23,10 +23,10 @@
 #'
 #' @examples
 #'
-#' plot_rate_comps(data = example_sets,
+#' plot_set_rate_comps(data = example_sets,
 #'                 plot_type = 1)
 #'
-#' plot_rate_comps(data = example_sets,
+#' plot_set_rate_comps(data = example_sets,
 #'                plot_type = 2,
 #'                error_bar_type = "confint")
 #'
@@ -46,7 +46,7 @@
 #'                             "ci_high" = c(3.4, 4.8, 5.6))
 #'
 #'
-#' plot_rate_comps(data = example_rates,
+#' plot_set_rate_comps(data = example_rates,
 #'                 plot_type = 4,
 #'                 error_bar_type = "confint",
 #'                 set_ids = set_id,
@@ -111,9 +111,9 @@ plot_set_rate_comps <- function(data,
     y_axis_title <- "Station name"
 
     # plot titles
-    title_minimal <- "Elevation change"
-    title_se <- "Elevation change ± 1 standard error"
-    title_ci <- "Elevation change with 95% confidence intervals"
+    title_minimal <- "Elevation change (mm/yr)"
+    title_se <- "Elevation change ± 1 standard error (mm/yr)"
+    title_ci <- "Elevation change with 95% confidence intervals (mm/yr)"
 
     # plot_subtitles
     subtitle_comp1_se <- paste0(comp1_name, ", blue line & shading: ",
@@ -179,6 +179,7 @@ plot_set_rate_comps <- function(data,
                                  xmin = {{rates}} - {{set_se}},
                                  xmax = {{rates}} + {{set_se}}),
                              col = "gray55",
+                             height = 0.2,
                              size = 1)
 
     set_cis_lines <- geom_errorbarh(data = data, # plot type 2 & CI error bars for SETs
@@ -186,6 +187,7 @@ plot_set_rate_comps <- function(data,
                                   xmin = {{set_ci_low}},
                                   xmax = {{set_ci_high}}),
                               col = "gray55",
+                              height = 0.2,
                               size = 1)
 
     comp1_line <- geom_vline(aes(xintercept = {{comp1}}), # plot type 3: dark blue line for comp1
