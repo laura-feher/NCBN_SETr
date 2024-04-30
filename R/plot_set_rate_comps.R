@@ -1,293 +1,305 @@
-#' Graphical comparison of SET change rates to SLR
+#' Graphical comparison of SET change rates
 #'
-#' @param data a data frame
-#' @param plot_type one of various combinations of points and confidence intervals; default is 3.
-#' 1 = basic; points only; no confidence intervals
-#' 2 = CIs for SET rates, but not sea level rise (SLR)
-#' 3 = CIs for both SETs and SLR
-#' 4 = all of the above, plus a second comparison point and CIs
-#' @param color_by_veg TRUE or FALSE (the default), for whether the points representing SET elevation change rates should be colored according to dominant vegetation at or around the station (if TRUE, the dominant vegetation must be in a column identified by the `veg` argument of this function)
-#' @param set_ids column or vector containing unique SET IDs or names
-#' @param set_ci_low column or vector of numbers representing the lower limit of the 95\% confidence interval for the SET's rate of elevation change
-#' @param set_ci_high column or vector of numbers representing the upper limit of the 95\% confidence interval for the SET's rate of elevation change
-#' @param rates column or vector of numbers representing the point estimates of SET rates of elevation change
-#' @param comp1 single number that will make a line on the graph (e.g. long-term Sea Level Rise)
-#' @param comp1_ci_low single number representing the lower limit of the 95\% confidence interval for the point estimate `comp1`
-#' @param comp1_ci_high single number representing the upper limit of the 95\% confidence interval for the point estimate `comp1`
-#' @param comp2 optional; another single point estimate to use for a line on the graph (e.g. 19-year water level change)
-#' @param comp2_ci_low optional; a single number representing the lower limit of the 95\% confidence interval for the point estimate `comp2`
-#' @param comp2_ci_high optional; a single number representing the upper limit of the 95\% confidence interval for the point estimate `comp2`
-#' @param veg column or vector containing names of the dominant vegetation type at each SET
-#'
+#' @param data Either 1) a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm; or 2) a user-supplied data frame of SET rates with (at least) columns for SET IDs, SET-level rates, and either a) a single column with SET rate std error, or b) 2 columns with the high and low SET rate confidence intervals.
+#' @param plot_type One of various combinations of points, error bars, or confidence intervals; default is 2. 1 = basic; points only; no error bars/confidence intervals; 2 = SEs/CIs for SET rates; 3 = SEs/CIs for SET rates and a rate for comparison (e.g. sea-level rise); 4 = SEs/CIs for SET rates and 2 different rates for comparisons.
+#' @param set_ids Column name containing unique SET IDs or names. Defaults to station_code. The column name must be specified if using a user-supplied data frame of SET rates.
+#' @param rates Column name of numbers representing the linear estimates of SET rates of elevation change. Defaults to set_rate. The column name must be specified if using a user-supplied data frame of SET rates.
+#' @param error_bar_type For plot_types 2-4, choose display with either standard errors or 95% confidence intervals. 'se' = standard errors (default); 'confint' = 95% confidence intervals.
+#' @param set_se Column name of numbers representing the standard errors for each SET rate of elevation change. Defaults to se_rate. The column name must be specified if using a user-supplied data frame of SET rates.
+#' @param set_ci_low Column name of numbers representing the lower limit of the 95\% confidence interval for each SET rate of elevation change. Defaults to ci_low. The column name must be specified if using a user-supplied data frame of SET rates.
+#' @param set_ci_high Column of numbers representing the upper limit of the 95\% confidence interval for each SET rate of elevation change. Defaults to ci_high. The column name must be specified if using a user-supplied data frame of SET rates.
+#' @param comp1 optional; Single number for comparing to SET rates of change (e.g. long-term Sea Level Rise) - will appear as a line on the graph.
+#' @param comp1_se optional; Single number representing 1 standard error for the point estimate 'comp1'. Required if comp1 is specified and error_bar_type = "se".
+#' @param comp1_ci_low optional; Single number representing the lower limit of the 95\% confidence interval for the point estimate `comp1`. Required if comp1 is specified and error_bar_type = "confint".
+#' @param comp1_ci_high optional; Single number representing the upper limit of the 95\% confidence interval for the point estimate `comp1`. Required if comp1 is specified and error_bar_type = "confint".
+#' @param comp1_name optional; Label for comp1 value (e.g. "Local, long-term SLR").
+#' @param comp2 optional; Single number for comparing to SET rates of change (e.g. 19-year water level change) - will appear as a line on the graph.
+#' @param comp2_se optional; Single number representing 1 standard error for the point estimate 'comp2'. Required if comp2 is specified and error_bar_type = "se".
+#' @param comp2_ci_low optional; Single number representing the lower limit of the 95\% confidence interval for the point estimate `comp2`. Required if comp2 is specified and error_bar_type = "confint".
+#' @param comp2_ci_high optional; a single number representing the upper limit of the 95\% confidence interval for the point estimate `comp2`. Required if comp2 is specified and error_bar_type = "confint".
+#' @param comp2_name optional; Label for comp2 value (e.g. "19-yr water level change").
 #' @return a ggplot object
 #' @export
 #'
 #' @examples
+#'
+#' plot_rate_comps(data = example_sets,
+#'                 plot_type = 1)
+#'
+#' plot_rate_comps(data = example_sets,
+#'                plot_type = 2,
+#'                error_bar_type = "confint")
+#'
+#' plot_rate_comps(
+#'     data = example_sets,
+#'     plot_type = 3,
+#'     error_bar_type = "se",
+#'     comp1 = 3.5,
+#'     comp1_se = 0.2,
+#'     comp1_name = "Local, long-term SLR")
+#'
+#'
+#' # Example with a user-supplied data frame of SET rates
 #' example_rates <- data.frame("set_id" = c("SET1", "SET2", "SET3"),
 #'                             "set_rate" = c(3.2, 4.0, 5.4),
 #'                             "ci_low" = c(3.0, 3.2, 5.2),
-#'                             "ci_high" = c(3.4, 4.8, 5.6),
-#'                             "veg" = c("Spartina", "Juncus", "Distichlis"))
+#'                             "ci_high" = c(3.4, 4.8, 5.6))
 #'
-#' plot_rate_comps(data = example_rates,
-#'                 set_ids = set_id,
-#'                 set_ci_low = ci_low,
-#'                 set_ci_high = ci_high,
-#'                 rates = set_rate,
-#'                 comp1 = 3.5,
-#'                 comp1_ci_low = 3.3,
-#'                 comp1_ci_high = 3.7)
-#'
-#' plot_rate_comps(data = example_rates,
-#'                 set_ids = set_id,
-#'                 color_by_veg = TRUE,
-#'                 set_ci_low = ci_low,
-#'                 set_ci_high = ci_high,
-#'                 rates = set_rate,
-#'                 comp1 = 3.5,
-#'                 comp1_ci_low = 3.3,
-#'                 comp1_ci_high = 3.7,
-#'                 veg = veg)
 #'
 #' plot_rate_comps(data = example_rates,
 #'                 plot_type = 4,
+#'                 error_bar_type = "confint",
 #'                 set_ids = set_id,
+#'                 rates = set_rate,
 #'                 set_ci_low = ci_low,
 #'                 set_ci_high = ci_high,
-#'                 rates = set_rate,
 #'                 comp1 = 3.5,
 #'                 comp1_ci_low = 3.3,
 #'                 comp1_ci_high = 3.7,
-#'                 comp2 = 5.5,
-#'                 comp2_ci_low = 5.0,
-#'                 comp2_ci_high = 6.0)
+#'                 comp1_name = "Local, long-term SLR",
+#'                 comp2 = 4.0,
+#'                 comp2_ci_low = 3.6,
+#'                 comp2_ci_high = 4.4,
+#'                 comp2_name = "19-yr water level change")
+#'
+plot_set_rate_comps <- function(data,
+                                plot_type = 2,
+                                error_bar_type = "se",
+                                set_ids = station_code,
+                                rates = set_rate,
+                                set_se = se_rate,
+                                set_ci_low = ci_low,
+                                set_ci_high = ci_high,
+                                comp1 = NULL,
+                                comp1_se = NULL,
+                                comp1_ci_low = NULL,
+                                comp1_ci_high = NULL,
+                                comp1_name = "Comp1 rate",
+                                comp2 = NULL,
+                                comp2_se = NULL,
+                                comp2_ci_low = NULL,
+                                comp2_ci_high = NULL,
+                                comp2_name = "Comp2 rate"){
 
+    data <- calc_set_rates(data)
 
-plot_rate_comps <- function(data, plot_type = 3, color_by_veg = FALSE,
-                            set_ids, set_ci_low, set_ci_high,
-                            rates,
-                            comp1, comp1_ci_low, comp1_ci_high,
-                            comp2 = NULL, comp2_ci_low = NULL, comp2_ci_high = NULL,
-                            veg){
-
-    # plot_type: 1 = basic; points only; no confidence intervals
-    #            2 = CIs for SET rates, but not sea level rise (SLR)
-    #            3 = CIs for both SETs and SLR
-    #            4 = all of the above, plus a second comparison point and CIs
-    # default is the full plot with CIs, and with points all the same color
-
-
-    # calculate CI half-widths for plot labeling
-    comp1_ci_halfwidth <- (comp1_ci_high - comp1_ci_low) / 2
-    comp2_ci_halfwidth <- (comp2_ci_high - comp2_ci_low) / 2
-
-
-    # assemble the base plot, with axes and lines for 0 and SLR
+    # assemble the base plot, with axes and line for 0
     #####################################################################
     p <- ggplot() +
         geom_blank(data = data,
                    aes(x = {{rates}},
                        y = {{set_ids}})) +
-        geom_vline(aes(xintercept = {{comp1}}),
-                   col = "navyblue",
-                   size = 1,
-                   alpha = 0.9) +
         geom_vline(aes(xintercept = 0),
-                   col = "gray70") +
+                   col = "gray70",
+                   linetype = "dashed") +
         theme_classic()
 
 
     # assemble each piece
     #####################################################################
 
-    # points, not colored by veg
+    # points
     points_same <- geom_point(data = data,
                               aes(x = {{rates}},
                                   y = {{set_ids}}),
                               size = 3,
                               col = "red3")
 
-    # labels, when CIs are included for both SETs and SLR
-    labels_set_slr <- labs(title = "Elevation Change with 95% Confidence Intervals",
-                           subtitle = paste0("Local, long-term SLR in blue: ",
-                                             {{comp1}}, " +/- ",
-                                             comp1_ci_halfwidth, " mm/yr"),
-                           x = "Rate of change (mm/yr)",
-                           y = "SET")
 
-    # labels when SETs, SLR, and 19-year change are included
-    labels_all <- labs(title = "Elevation Change with 95% Confidence Intervals",
-                       subtitle = paste0("Long-term SLR, solid line & dark shading: ",
-                                         {{comp1}}, " +/- ",
-                                         comp1_ci_halfwidth, " mm/yr",
-                                         "\n19-yr water level change, dashed line & light shading: ",
-                                         {{comp2}}, " +/- ",
-                                         comp2_ci_halfwidth, " mm/yr"),
-                       x = "Rate of change (mm/yr)",
-                       y = "SET")
+    # axis titles
+    x_axis_title <- "Rate of change (mm/yr)"
+    y_axis_title <- "Station name"
 
-    # labels, when no CIs are included
-    labels_minimal <- labs(title = "Elevation Change",
-                           subtitle = paste0("Local SLR in blue: ", {{comp1}}, " mm/yr"),
-                           x = "Rate of change (mm/yr)",
-                           y = "SET")
+    # plot titles
+    title_minimal <- "Elevation change"
+    title_se <- "Elevation change ± 1 standard error"
+    title_ci <- "Elevation change with 95% confidence intervals"
 
-    # labels, when CIs are included for SETs but not SLR
-    labels_partial_setci <- labs(title = "Elevation Change with 95% Confidence Intervals",
-                                 subtitle = paste0("Local SLR in blue: ", {{comp1}}, " mm/yr"),
-                                 x = "Rate of change (mm/yr)",
-                                 y = "SET")
+    # plot_subtitles
+    subtitle_comp1_se <- paste0(comp1_name, ", blue line & shading: ",
+           format({{comp1}}, nsmall = 1), " +/- ",
+           format({{comp1_se}}, nsmall = 1), " mm/yr")
 
-    # geom to include when CIs are included for SETs
-    set_cis <- geom_errorbarh(data = data,
+    subtitle_comp1_ci <- paste0(comp1_name, ", blue line & shading: ",
+                                format({{comp1}}, nsmall = 1), " +/- ",
+                                format(({{comp1_ci_high}} - {{comp1_ci_low}}) / 2, nsmall = 1), " mm/yr")
+
+    subtitle_comp2_se <- paste0(comp1_name, ", blue line & shading: ",
+                                format({{comp1}}, nsmall = 1), " +/- ",
+                                format({{comp1_se}}, nsmall = 1), " mm/yr",
+                                "\n", comp2_name, ", green line & shading: ",
+                                format({{comp2}}, nsmall = 1), " +/- ",
+                                format({{comp2_se}}, nsmall = 1), " mm/yr")
+
+    subtitle_comp2_ci <- paste0("Long-term SLR, blue line & shading: ",
+                                format({{comp1}}, nsmall = 1), " +/- ",
+                                format(({{comp1_ci_high}} - {{comp2_ci_low}}) / 2, nsmall = 1), " mm/yr",
+                                "\n", comp2_name, ", green line & shading: ",
+                                format({{comp2}}, nsmall = 1), " +/- ",
+                                format(({{comp2_ci_high}} - {{comp2_ci_low}}) / 2, nsmall = 1), " mm/yr")
+
+
+    # assemble axis labels and plot titles
+    labels_minimal <- labs(title = title_minimal, # plot type 1: labels when no SEs/CIs are included
+                           x = x_axis_title,
+                           y = y_axis_title)
+
+    labels_set_se <- labs(title = title_se, # plot type 2: labels when SEs are included for SETs
+                          x = x_axis_title,
+                          y = y_axis_title)
+
+    labels_set_ci <- labs(title = title_ci, # plot type 2: labels when CIs are included for SETs
+                          x = x_axis_title,
+                          y = y_axis_title)
+
+    labels_set_se_comp1_se <- labs(title = title_se, # plot type 3: labels when SEs for SETs and comp1 are included
+                                 subtitle = subtitle_comp1_se,
+                                 x = x_axis_title,
+                                 y = y_axis_title)
+
+    labels_set_ci_comp1_ci <- labs(title = title_ci, # plot type 3: labels when CIs for SETs and comp1 are included
+                                   subtitle = subtitle_comp1_ci,
+                                   x = x_axis_title,
+                                   y = y_axis_title)
+
+    labels_set_se_comp2_se <- labs(title = title_se,
+                                   subtitle = subtitle_comp2_se,
+                                   x = x_axis_title,
+                                   y = y_axis_title)
+
+    labels_set_ci_comp2_ci <- labs(title = title_ci,
+                                   subtitle = subtitle_comp2_ci,
+                                   x = x_axis_title,
+                                   y = y_axis_title)
+
+
+    # assemble geoms
+    set_se_lines <- geom_errorbarh(data = data,  # plot type 2 & SE error bars for SETs
+                             aes(y = {{set_ids}},
+                                 xmin = {{rates}} - {{set_se}},
+                                 xmax = {{rates}} + {{set_se}}),
+                             col = "gray55",
+                             size = 1)
+
+    set_cis_lines <- geom_errorbarh(data = data, # plot type 2 & CI error bars for SETs
                               aes(y = {{set_ids}},
                                   xmin = {{set_ci_low}},
                                   xmax = {{set_ci_high}}),
                               col = "gray55",
                               size = 1)
 
-    # geom to include when CI is included for SLR
-    slr_cis <- geom_rect(aes(ymin = -Inf,
-                             ymax = Inf,
-                             xmin = {{comp1_ci_low}},
-                             xmax = {{comp1_ci_high}}),
-                         fill = "#08519c", # formerly navyblue. #08519c is a contender; 0.2 here and 0.1 in comp2; #08306b is another one i like a lot
-                         alpha = 0.2)
+    comp1_line <- geom_vline(aes(xintercept = {{comp1}}), # plot type 3: dark blue line for comp1
+               col = "navyblue",
+               size = 1,
+               alpha = 0.9)
 
-    # geom to include with point estimate for comp2
-    comp2_line <- geom_vline(aes(xintercept = {{comp2}}),
-                             col = "navyblue",
+    comp2_line <- geom_vline(aes(xintercept = {{comp2}}), # plot type 4: dark blue line for comp1
+                             col = "darkgreen",
                              size = 1,
-                             linetype = "dashed",
                              alpha = 0.9)
 
-    # geom to include when point and CI included for comp2
-    comp2_cis <- geom_rect(aes(ymin = -Inf,
-                               ymax = Inf,
-                               xmin = {{comp2_ci_low}},
-                               xmax = {{comp2_ci_high}}),
-                           fill = "#08519c",     #7bccc4, 0.2
-                           alpha = 0.1)
+    comp1_se_bars <- geom_rect(aes(ymin = -Inf, # plot type 3 & SE error bars
+                                   ymax = Inf,
+                                   xmin = {{comp1}} - {{comp1_se}},
+                                   xmax = {{comp1}} + {{comp1_se}}),
+                               fill = "#08519c",
+                               alpha = 0.2)
+
+    comp1_ci_bars <- geom_rect(aes(ymin = -Inf, # plot type 3 & CI error bars
+                                   ymax = Inf,
+                                   xmin = {{comp1_ci_low}},
+                                   xmax = {{comp1_ci_high}}),
+                               fill = "#08519c",
+                               alpha = 0.2)
+
+    comp2_se_bars <- geom_rect(aes(ymin = -Inf, # plot type 4 & SE error bars
+                                   ymax = Inf,
+                                   xmin = {{comp2}} - {{comp2_se}},
+                                   xmax = {{comp2}} + {{comp2_se}}),
+                               fill = "#7bccc4",
+                               alpha = 0.2)
+
+    comp2_ci_bars <- geom_rect(aes(ymin = -Inf, # plot type 4 & CI error bars
+                                   ymax = Inf,
+                                   xmin = {{comp1_ci_low}},
+                                   xmax = {{comp1_ci_high}}),
+                               fill = "#7bccc4",
+                               alpha = 0.2)
 
 
-    # geom and labels if points will be colored by dominant vegetation type
-    if(color_by_veg){
-        # the veg column has to be defined
-        # this doesn't work though: stopifnot(exists({{veg}}, data))
-        points_veg <- geom_point(data = data,
-                                 aes(x = {{rates}},
-                                     y = {{set_ids}},
-                                     col = {{veg}}),
-                                 size = 3)
-        colors_veg <- scale_color_brewer(type = "qual", palette = "Dark2")
-        labels_veg <- labs(color = "Dominant Vegetation")
-    }
-
-
-
-    ##### Assemble in different ways
+    ### Assemble in different ways
     #####################################################################
 
 
-    ####################################################################
-    ### minimal plot: points only; no confidence intervals
-    ####################################################################
-
-    # don't color by veg
-    if(plot_type == 1 && !color_by_veg){
+    # minimal plot: points only; no confidence intervals
+    if(plot_type == 1){
         p <- p +
             points_same +
             labels_minimal
     }
 
-    # do color by veg
-    if(plot_type == 1 && color_by_veg){
+    # Add in SEs or CIs for SETs
+
+    if(plot_type == 2 & error_bar_type == "se"){
         p <- p +
-            points_veg +
-            colors_veg +
-            labels_minimal +
-            labels_veg
-    }
-
-
-
-
-    ####################################################################
-    # Add in CIs for SETs
-    ####################################################################
-    # don't color by veg
-    if(plot_type == 2 && !color_by_veg){
-        p <- p +
-            set_cis +
+            set_se_lines +
             points_same +
-            labels_partial_setci
-    }
-
-    # do color by veg
-    if(plot_type == 2 && color_by_veg){
-        p <- p +
-            set_cis +
-            points_veg +
-            colors_veg +
-            labels_partial_setci +
-            labels_veg
+            labels_set_se
     }
 
 
-
-    ####################################################################
-    # CIs for both SETs and SLR
-    ####################################################################
-    # don't color by veg
-    if(plot_type == 3 && !color_by_veg){
+    if(plot_type == 2 & error_bar_type == "confint"){
         p <- p +
-            set_cis +
-            slr_cis +
+            set_cis_lines +
             points_same +
-            labels_set_slr
+            labels_set_ci
     }
 
-
-    # do color by veg
-    if(plot_type == 3 && color_by_veg){
+    # Add in comp1 with SEs or CIs for SERs
+    if(plot_type == 3 & error_bar_type == "se"){
         p <- p +
-            set_cis +
-            slr_cis +
-            points_veg +
-            colors_veg +
-            labels_set_slr +
-            labels_veg
+            comp1_se_bars +
+            comp1_line +
+            set_se_lines +
+            points_same +
+            labels_set_se +
+            labels_set_se_comp1_se
     }
 
-
-    ####################################################################
-    # Everything including comp2
-    ####################################################################
-    # don't color by veg
-    if(plot_type == 4 && !color_by_veg){
+    if(plot_type == 3 & error_bar_type == "confint"){
         p <- p +
-            set_cis +
-            slr_cis +
+            comp1_ci_bars +
+            comp1_line +
+            set_cis_lines +
+            points_same +
+            labels_set_ci +
+            labels_set_ci_comp1_ci
+    }
+
+    # Add in comp2 with SEs or CIs for SETs
+    if(plot_type == 4 & error_bar_type == "se"){
+        p <- p +
+            comp2_se_bars +
             comp2_line +
-            comp2_cis +
+            comp1_se_bars +
+            comp1_line +
+            set_se_lines +
             points_same +
-            labels_all
+            labels_set_se +
+            labels_set_se_comp2_se
     }
 
-
-    # do color by veg
-    if(plot_type == 4 && color_by_veg){
+    if(plot_type == 4 & error_bar_type == "confint"){
         p <- p +
-            set_cis +
-            slr_cis +
+            comp2_ci_bars +
             comp2_line +
-            comp2_cis +
-            points_veg +
-            colors_veg +
-            labels_all +
-            labels_veg
+            comp1_ci_bars +
+            comp1_line +
+            set_cis_lines +
+            points_same +
+            labels_set_ci +
+            labels_set_ci_comp2_ci
     }
-
 
     return(p)
 
