@@ -1,25 +1,16 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# SETr
+# SETrNCBN
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
-The goal of SETr is to simplify calculations and make graphs for QA/QC
-and communication of Surface Elevation Table (SET) data.
+The goal of SETrNCBN is to simplify calculations and make graphs for
+QA/QC and communication of NCBN Surface Elevation Table (SET) data.
 
-This package is under development, based on functions created as part of
-a larger workflow. All code for that project is also on [GitHub,
-here](https://github.com/swmpkim/SETr_Reserve_Template); and at the top
-of the README for that repo are links to publicly available project
-outputs. Most of the functions here were used in the [Reserve-level
-technical
-reports](https://drive.google.com/drive/folders/1ExY94WWOoS3iY3iJpKdteI96_iFnDdMM?usp=sharing).
-At first, certain column names will have to exist in the data frames
-that these functions are used on. As time permits, I hope to add some
-flexibility.
+This package is under development [GitHub,
+here](https://github.com/laura-feher/NCBN_SETr).
 
 This README still needs a lot of attention too; the example below is
 very minimal.
@@ -31,7 +22,7 @@ You can install the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("swmpkim/SETr")
+devtools::install_github("laura-feher/NCBN_SETr")
 ```
 
 ## Example
@@ -40,13 +31,13 @@ This is a basic example which shows you how to make a simple graph of
 change since the first reading at each SET:
 
 ``` r
-library(SETr)
+library(SETrNCBN)
 
 # first, perform cumulative change calculations
 cumu_set <- calc_change_cumu(example_sets)
 
 # now plot cumulative change by SET
-plot_cumu_set(cumu_set$set)
+plot_cumu_set(example_sets)
 ```
 
 <img src="man/figures/README-example-1.png" width="70%" />
@@ -54,7 +45,7 @@ plot_cumu_set(cumu_set$set)
 ``` r
 
 # or by arm, at a single SET
-plot_cumu_arm(cumu_set$arm)
+plot_cumu_arm(example_sets)
 ```
 
 <img src="man/figures/README-example-2.png" width="70%" />
