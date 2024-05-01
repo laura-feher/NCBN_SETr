@@ -18,6 +18,7 @@
 
 plot_incr_pin <- function(data, set, threshold = 25, columns = 2, pointsize = 2, scales = "fixed"){
 
+    data <- calc_change_incr(data)
     data <- data$pin
 
     # data needs to be the $pin piece of the output from calc_change_inc

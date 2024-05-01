@@ -20,6 +20,7 @@
 plot_incr_arm <- function(data, set = NULL, threshold = 25, columns = 4,
                           pointsize = 2, scales = "fixed"){
 
+    data <- calc_change_incr(data)
     data <- data$arm
 
     # data needs to be the $arm piece of the output from calc_change_inc

@@ -16,6 +16,11 @@
 #' plot_cumu_arm(cumu_set$arm, columns = 1, pointsize = 2)
 
 plot_cumu_arm <- function(data, columns = 4, pointsize = 2, scales = "fixed") {
+
+    # first calculate cumulative change for each SET
+    data <- calc_change_cumu(data)
+    data <- data$arm
+
     # data needs to be the $arm piece of the output from calc_change_cumu
     ggplot2::ggplot(data, ggplot2::aes(x = event_date_UTC, y = mean_cumu, col = as.factor(SET_direction))) +
         ggplot2::geom_point(size = pointsize) +

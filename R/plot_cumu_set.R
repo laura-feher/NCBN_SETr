@@ -18,6 +18,10 @@
 #' plot_cumu_set(cumu_set$set, columns = 1, pointsize = 2, smooth = FALSE)
 
 plot_cumu_set <- function(data, columns = 4, pointsize = 3.5, scales = "fixed", smooth = TRUE, lty_smooth = 5){
+
+    data <- calc_change_cumu(data)
+    data <- data$set
+
     # data needs to be the $set piece of the output from calc_change_cumu
     ggplot2::ggplot(data, ggplot2::aes(x = event_date_UTC, y = mean_cumu)) +
         ggplot2::geom_line(col = 'lightsteelblue4') +
