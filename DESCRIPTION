@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "laura_feher@nps.gov")
 Description: Simplifies calculations and makes graphs for 
-    QA/QC and communication of SET data.
+    QA/QC and communication of NCBN SET data.
 License: What license it uses
 Encoding: UTF-8
 LazyData: true
