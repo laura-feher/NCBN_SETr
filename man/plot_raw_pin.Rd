@@ -2,12 +2,12 @@
 % Please edit documentation in R/plot_raw_pin.R
 \name{plot_raw_pin}
 \alias{plot_raw_pin}
-\title{Plot raw pin readings for a single SET, faceted by arm position}
+\title{Plot raw pin readings for a single SET, faceted by SET direction}
 \usage{
 plot_raw_pin(data, set, columns = 2, pointsize = 2, scales = "fixed")
 }
 \arguments{
-\item{data}{a data frame with one row per pin reading, and the following columns, named exactly: date, set_id, arm_position, pin_number, pin_height}
+\item{data}{a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_height_mm}
 
 \item{set}{character string for the SET you wish to examine}
 
@@ -21,10 +21,10 @@ plot_raw_pin(data, set, columns = 2, pointsize = 2, scales = "fixed")
 a ggplot object
 }
 \description{
-Plot raw pin readings for a single SET, faceted by arm position
+Plot raw pin readings for a single SET, faceted by SET direction
 }
 \examples{
-plot_raw_pin(example_sets, "SET1")
-plot_raw_pin(example_sets, "SET1", columns = 1, pointsize = 4)
-plot_raw_pin(example_sets, "SET1", scales = "free_y")
+plot_raw_pin(example_sets, set = "M11-1")
+plot_raw_pin(example_sets, "M11-1", columns = 1, pointsize = 4)
+plot_raw_pin(example_sets, "M11-1", scales = "free_y")
 }

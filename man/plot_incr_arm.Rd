@@ -2,13 +2,19 @@
 % Please edit documentation in R/plot_incr_arm.R
 \name{plot_incr_arm}
 \alias{plot_incr_arm}
-\title{Plot change between readings, by arm}
+\title{Plot change between readings, by SET_direction (i.e., arm)}
 \usage{
-plot_incr_arm(data, set = NULL, threshold = 25, columns = 4,
-  pointsize = 2, scales = "fixed")
+plot_incr_arm(
+  data,
+  set = NULL,
+  threshold = 25,
+  columns = 4,
+  pointsize = 2,
+  scales = "fixed"
+)
 }
 \arguments{
-\item{data}{data frame (e.g. `$arm` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: date, set_id, arm_position, mean_incr. `mean_incr` should be an already-calculated field of change since previous reading}
+\item{data}{data frame (e.g. the `$arm` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, mean_incr. `mean_incr` should be an already-calculated field of change since previous reading}
 
 \item{set}{optional SET ID if you only want to look at one SET; default is to graph all SETs}
 
@@ -24,11 +30,11 @@ plot_incr_arm(data, set = NULL, threshold = 25, columns = 4,
 a ggplot object
 }
 \description{
-Plot change between readings, by arm
+Plot change between readings, by SET_direction (i.e., arm)
 }
 \examples{
 incr_set <- calc_change_incr(example_sets)
-plot_incr_arm(incr_set$arm)
-plot_incr_arm(incr_set$arm, threshold = 5, columns = 1)
-plot_incr_arm(incr_set$arm, set = "SET2", threshold = 5)
+plot_incr_arm(incr_set)
+plot_incr_arm(incr_set, threshold = 5, columns = 1)
+plot_incr_arm(incr_set, set = "SET2", threshold = 5)
 }
