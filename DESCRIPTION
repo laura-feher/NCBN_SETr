@@ -10,6 +10,7 @@ Authors@R:
            family = "Cressman",
            role = c("aut"),
            email = "kim@catbirdstats.com")
+Maintainer: Laura Feher <laura_feher@nps.gov>
 Description: Simplifies calculations and makes graphs for 
     QA/QC and communication of NCBN SET data.
 License: MIT + file LICENSE
