@@ -1,10 +1,13 @@
 #' Generate a histogram of pin readings by arm position
 #'
-#' @param data a data frame with one row per pin reading, and the following columns, named exactly: network_code, park_code, site_name, station_code, SET_direction, pin_height_mm
-#' @param columns number of columns you'd like in the faceted plot
-#' @param scales passed to `facet_wrap` - fixed or free?
+#' @param data Data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, and pin_height_mm.
+#'
+#' @param columns Number of columns you want in the faceted output; defaults to 4.
+#'
+#' @param scales Do you want axis scales to be the same in all facets ("fixed") or to vary between facets "free_x" or "free_y" or "free" - goes into `scales` arg of `facet_wrap`; defaults to "free_y".
 #'
 #' @return a ggplot object
+#'
 #' @export
 #'
 #' @examples
