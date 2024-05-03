@@ -12,8 +12,8 @@ QA/QC and communication of NCBN Surface Elevation Table (SET) data.
 This package is under development [GitHub,
 here](https://github.com/laura-feher/NCBN_SETr).
 
-This README still needs a lot of attention too; the example below is
-very minimal.
+This package is based on the [SETr](https://github.com/swmpkim/SETr)
+package developed by Kim Cressman.
 
 ## Installation
 
@@ -22,7 +22,7 @@ You can install the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("laura-feher/NCBN_SETr")
+devtools::install_github("laura-feher/SETrNCBN")
 ```
 
 ## Example

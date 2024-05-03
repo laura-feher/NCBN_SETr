@@ -4,11 +4,17 @@
 \alias{plot_incr_pin}
 \title{Plot change between readings, by pin}
 \usage{
-plot_incr_pin(data, set, threshold = 25, columns = 2, pointsize = 2,
-  scales = "fixed")
+plot_incr_pin(
+  data,
+  set,
+  threshold = 25,
+  columns = 2,
+  pointsize = 2,
+  scales = "fixed"
+)
 }
 \arguments{
-\item{data}{data frame (e.g. `$pin` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: date, set_id, arm_position, pin_number, incr. `incr` should be an already-calculated field of change since previous reading.}
+\item{data}{data frame (e.g. the `$pin` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_positionr, incr. `incr` should be an already-calculated field of change since previous reading.}
 
 \item{set}{SET ID to graph (required)}
 
@@ -28,7 +34,7 @@ Plot change between readings, by pin
 }
 \examples{
 incr_set <- calc_change_incr(example_sets)
-plot_incr_pin(incr_set$pin, set = "SET1")
-plot_incr_pin(incr_set$pin, set = "SET1", threshold = 5)
-plot_incr_pin(incr_set$pin, set = "SET2", threshold = 5, columns = 1)
+plot_incr_pin(incr_set, set = "M11-1")
+plot_incr_pin(incr_set, set = "M11-1", threshold = 5)
+plot_incr_pin(incr_set, set = "M11-1", threshold = 5, columns = 1)
 }

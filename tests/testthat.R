@@ -1,4 +1,4 @@
 library(testthat)
-library(SETr)
+library(SETrNCBN)
 
-test_check("SETr")
+test_check("SETrNCBN")

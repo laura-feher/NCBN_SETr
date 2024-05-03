@@ -7,7 +7,7 @@
 plot_cumu_arm(data, columns = 4, pointsize = 2, scales = "fixed")
 }
 \arguments{
-\item{data}{data frame (e.g. `$arm` piece of output from `calc_change_cumu()`) with one row per faceting variable, and the following columns, named exactly: date, set_id, arm_position, mean_cumu. `mean_cumu` should be an already-calculated field of change since baseline.}
+\item{data}{data frame (e.g. `$arm` piece of output from `calc_change_cumu()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, set_id, SET_direction, mean_cumu. `mean_cumu` should be an already-calculated field of change since baseline.}
 
 \item{columns}{number of columns you want in the faceted output}
 

@@ -2,13 +2,19 @@
 % Please edit documentation in R/plot_raw_arm.R
 \name{plot_raw_arm}
 \alias{plot_raw_arm}
-\title{Plot raw pin measurements, first averaged to arm level, by date}
+\title{Plot raw pin measurements, first averaged to SET_direction level, by date}
 \usage{
-plot_raw_arm(data, columns = 4, pointsize = 2, sdline = TRUE,
-  sdlinesize = 1, scales = "free_y")
+plot_raw_arm(
+  data,
+  columns = 4,
+  pointsize = 2,
+  sdline = TRUE,
+  sdlinesize = 1,
+  scales = "free_y"
+)
 }
 \arguments{
-\item{data}{a data frame with one row per pin reading, and the following columns, named exactly: date, set_id, arm_position, pin_height}
+\item{data}{a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_height_mm}
 
 \item{columns}{number of columns for the faceted graph}
 
@@ -24,7 +30,7 @@ plot_raw_arm(data, columns = 4, pointsize = 2, sdline = TRUE,
 a ggplot object
 }
 \description{
-Plot raw pin measurements, first averaged to arm level, by date
+Plot raw pin measurements, first averaged to SET_direction level, by date
 }
 \examples{
 plot_raw_arm(example_sets)

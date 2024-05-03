@@ -6,9 +6,14 @@ Authors@R:
            family = "Feher",
            role = c("aut", "cre"),
            email = "laura_feher@nps.gov")
+    person(given = "Kim",
+           family = "Cressman",
+           role = c("aut"),
+           email = "kim@catbirdstats.com")
+Maintainer: Laura Feher <laura_feher@nps.gov>
 Description: Simplifies calculations and makes graphs for 
-    QA/QC and communication of SET data.
-License: What license it uses
+    QA/QC and communication of NCBN SET data.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.1

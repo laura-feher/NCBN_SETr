@@ -1,10 +1,10 @@
 #' Calculate Cumulative Change at a SET
 #'
-#' @param data_type Either "database" if you want to connect to the NPS SET database (authorized users) or "saved_file" if you have a saved .csv or xlse file.
+#' @param park_code optional; A 4 character park code that can be used to filter results from the NPS SET database to a specific park.
 #'
-#' @param file_path If using a saved .csv or .xlsx file, the full file path to the saved file. Must be table with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm.
+#' @param network_code optional; A 4 character network code that can be used to filter results from the NPS SET database to a specific I&M network.
 #'
-#' @param park_code A 4 character park code that can be used to filter results from the NPS database to a specific park.
+#' @param file_path optional; If, instead of connecting to the NPS SET database, you want to use a saved .csv or .xlsx file, the full file path to the saved file. Must be table with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm.
 #'
 #' @return A data frame of raw SET data.
 #'
@@ -16,9 +16,9 @@
 #'
 #' load_set_data(data_type = "saved_file", file_path = "C:/Documents/Data/my_SET_data.csv")
 #'
-load_set_data <- function(data_type = "database", file_path = NULL, park_code = NULL){
+load_set_data <- function(park_code = NULL, network_code = NULL, file_path = NULL){
 
-    if(data_type == "database") {
+    if(is.null(file_path)) {
     # Set up connection variables
     database_server <- "inp2300irmadb01.nps.doi.net\\ntwk"
     database_name <- "SET"
@@ -32,25 +32,45 @@ load_set_data <- function(data_type = "database", file_path = NULL, park_code = 
                           Trusted_Connection = "Yes",
                           Port = 1433)
 
-    # get data from SET db and filter to NCBN data
-    if(!is.null(park_code)) {
-        data <- DBI::dbGetQuery(con, 'SELECT * FROM ssrs.vw_dbx_SET_data_FINAL') %>%
-            dplyr::filter(park_code == !!park_code)
+    # get data from SET db and filter to a specific park
+    if(!is.null(park_code) & is.null(network_code)) {
+        dataf <- DBI::dbSendQuery(con, 'SELECT * FROM ssrs.vw_dbx_SET_data_FINAL WHERE park_code = ?')
+        data <- DBI::dbBind(dataf, list(toupper(park_code)))
+        data <- DBI::dbFetch(data)
+        DBI::dbClearResult(dataf)
     }
 
-    else if(is.null(park_code)) {
+    # get data from SET db and filter to a specific I&M network
+    else if(!is.null(network_code) & is.null(park_code)) {
+        dataf <- DBI::dbSendQuery(con, 'SELECT * FROM ssrs.vw_dbx_SET_data_FINAL WHERE network_code = ?')
+        data <- DBI::dbBind(dataf, list(toupper(network_code)))
+        data <- DBI::dbFetch(data)
+        DBI::dbClearResult(dataf)
+    }
+
+    # if both park and network are specified, ignore network_code and filter to park_code
+    else if(!is.null(park_code) & !is.null(network_code)) {
+        dataf <- DBI::dbSendQuery(con, 'SELECT * FROM ssrs.vw_dbx_SET_data_FINAL WHERE park_code = ?')
+        data <- DBI::dbBind(dataf, list(toupper(park_code)))
+        data <- DBI::dbFetch(data)
+        DBI::dbClearResult(dataf)
+    }
+
+    # or return the whole database
+    else if(is.null(park_code) & is.null(network_code)) {
         data <- DBI::dbGetQuery(con, 'SELECT * FROM ssrs.vw_dbx_SET_data_FINAL')
     }
+
     # close database connection to free up resources
     DBI::dbDisconnect(con)
     }
 
-    else if(data_type == "saved_file" & grepl(file_path, ".csv")) {
+    else if(!is.null(file_path) & stringr::str_detect(file_path, ".csv")) {
         data <- read.csv(file_path)
     }
 
-    else if(data_type == "saved_file" & (grepl(file_path, ".xls") | grepl(file_path, ".xlsx"))) {
-        data <- readxl::read_xlsx(file_path)
+    else if(!is.null(file_path) & (stringr::str_detect(file_path, ".xls") | stringr::str_detect(file_path, ".xlsx"))) {
+        data <- readxl::read_excel(file_path)
     }
     return(data)
 

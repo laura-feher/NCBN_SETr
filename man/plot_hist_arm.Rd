@@ -7,7 +7,7 @@
 plot_hist_arm(data, columns = 4, scales = "free_y")
 }
 \arguments{
-\item{data}{a data frame with one row per pin reading, and the following columns, named exactly: set_id, arm_position, pin_height}
+\item{data}{a data frame with one row per pin reading, and the following columns, named exactly: network_code, park_code, site_name, station_code, SET_direction, pin_height_mm}
 
 \item{columns}{number of columns you'd like in the faceted plot}
 

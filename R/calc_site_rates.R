@@ -1,3 +1,14 @@
+#' Calculate site-level linear rates of elevation change
+#'
+#' @param data a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm
+#'
+#' @return A data frame with linear regressions models, rates of change, standard errors, and confidence intervals for each site.
+#'
+#' @export
+#'
+#' @examples
+#' calc_site_rates(example_sets)
+#'
 calc_site_rates <- function(data) {
 
     # first calculate cumulative change for each SET

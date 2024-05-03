@@ -1,35 +1,51 @@
-#' Make a graph of change over time by SET
+#' Make a graph of change over time by SET (or station)
 #'
-#' x-axis is date; y-axis is the average of the 36 pin heights' difference from baseline (first measurement). One facet per SET id.
+#' x-axis is date; y-axis is the average of the 36 pin heights' difference from baseline (first measurement). One facet per SET/station id.
 #'
-#' @param data data frame (e.g. `$set` piece of output from `calc_change_cumu()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, set_id, mean_cumu. `mean_cumu` should be an already-calculated field of change since baseline.
-#' @param columns number of columns you want in the faceted output
-#' @param pointsize size of points you want (goes into the `size` argument of `ggplot2::geom_point`)
-#' @param scales passed to `facet_wrap`; same fixed/free options as that function
-#' @param smooth do you want a linear regression plotted on top?
-#' @param lty_smooth type of line (1 = solid; 2 and 5 = dashed; normal line types)
+#' @param data Data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, and pin_height_mm.
+#'
+#' @param columns Number of columns you want in the faceted output; defaults to 4.
+#'
+#' @param pointsize Size of points you want (goes into the `size` argument of `ggplot2::geom_point`); defaults to 3.5.
+#'
+#' @param scales Do you want axis scales to be the same in all facets ("fixed") or to vary between facets "free_x" or "free_y" or "free" - goes into `scales` arg of `facet_wrap`; defaults to "free_y".
+#'
+#' @param smooth Do you want a linear regression plotted on top? defaults to TRUE.
+#'
+#' @param lty_smooth What type of line do you want the linear regression to plot as? 1 = solid; 2 and 5 = dashed; or any of the other line types available in `ggplot2`. defaults to dashed.
 #'
 #' @return a ggplot object
+#'
 #' @export
 #'
 #' @examples
-#' cumu_set <- calc_change_cumu(example_sets)
-#' plot_cumu_set(cumu_set$set)
-#' plot_cumu_set(cumu_set$set, columns = 1, pointsize = 2, smooth = FALSE)
+#' plot_cumu_set(example_sets)
+#' plot_cumu_set(example_sets, columns = 1, pointsize = 2, smooth = FALSE)
 
 plot_cumu_set <- function(data, columns = 4, pointsize = 3.5, scales = "fixed", smooth = TRUE, lty_smooth = 5){
 
-    data <- calc_change_cumu(data)
-    data <- data$set
+    dataf <- calc_change_cumu(data)
+    dataf <- dataf$set
+
+    # calculate linear rates of change for each SET/station
+    rates <- calc_set_rates(data)
 
     # data needs to be the $set piece of the output from calc_change_cumu
-    ggplot2::ggplot(data, ggplot2::aes(x = event_date_UTC, y = mean_cumu)) +
+    ggplot2::ggplot(dataf, ggplot2::aes(x = event_date_UTC, y = mean_cumu)) +
         ggplot2::geom_line(col = 'lightsteelblue4') +
         {if(smooth) ggplot2::geom_smooth(se = FALSE, method = 'lm',
                                 col = 'steelblue4', lty = lty_smooth, size = 1)} +
         ggplot2::geom_point(shape = 21,
                    fill = 'lightsteelblue1', col = 'steelblue3',
                    size = pointsize, alpha = 0.9) +
+        {if(smooth) ggplot2::geom_text(
+            data = rates,
+            aes(x = structure(Inf, class = "Date"), y = Inf, label =
+                    paste("rate:", format(round(set_rate, 2), nsmall = 2), "+",
+                          format(round(se_rate, 2), nsmall = 2), "\n" , "r2:",
+                          format(round(set_rate_r2, 2), nsmall = 2), sep = " ")),
+            hjust = 1,
+            vjust = 2)} +
         ggplot2::facet_wrap(~station_code, ncol = columns, scales = scales) +
         {if(smooth) ggplot2::labs(title = 'Cumulative Change since first reading',
                          x = 'Date',
