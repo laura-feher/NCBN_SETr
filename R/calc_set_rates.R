@@ -25,6 +25,7 @@ calc_set_rates <- function(data) {
                set_lm_model_summary = map(set_lm_model, ~summary(.)),
                set_rate = map_dbl(set_lm_model, ~coefficients(.)[['date_num']]),
                se_rate = map_dbl(set_lm_model_summary, ~.$coefficients[['date_num', 'Std. Error']]),
+               set_rate_r2 = map_dbl(set_lm_model_summary, ~.$r.squared),
                ci = map(set_lm_model, ~as.data.frame(confint(., parm = c("date_num"), level = 0.95))),
                ci_low = map_dbl(ci, ~.$`2.5 %`),
                ci_high =  map_dbl(ci, ~.$`97.5 %`),
