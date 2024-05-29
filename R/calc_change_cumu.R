@@ -9,13 +9,13 @@
 #' @examples
 #' calc_change_cumu(example_sets)
 #'
-calc_change_cumu <- function(dat) {
+calc_change_cumu <- function(data) {
 
     ## conditions: have correct columns in data frame
     ## stop and give an informative message if this isn't met
     req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm")
 
-    if(sum(req_clms %in% names(dat)) != length(req_clms)){
+    if(sum(req_clms %in% names(data)) != length(req_clms)){
         stop(paste("Your data frame must have the following columns, with these names, but is missing at least one:", paste(req_clms, collapse = ", ")))
     }
 
@@ -25,7 +25,7 @@ calc_change_cumu <- function(dat) {
     # have to make sure to arrange properly so correct pin reading is subtracted off
 
     # by pin
-    change_cumu_pin <- dat %>%
+    change_cumu_pin <- data %>%
         #dplyr::mutate(set_id = paste(network_code, park_code, station_code, sep = "_")) %>%
         dplyr::arrange(network_code, park_code, site_name, station_code, SET_direction, pin_position, event_date_UTC) %>%
         dplyr::group_by(network_code, park_code, site_name, station_code, SET_direction, pin_position) %>%
@@ -33,7 +33,6 @@ calc_change_cumu <- function(dat) {
                       cumu = pin_height_mm - first_pin_height) %>%
         # dplyr::mutate(cumu = pin_height_mm - pin_height_mm[1]) %>% # this is Kim's formula for getting cumulative change but it doesn't work if the earliest date is NA
         # mutate(cumu = pin_height_mm - pin_height_mm[min(which(!is.na(pin_height_mm)))]) %>% ##### subtract off the first pin reading that's not NA
-        dplyr::select(-pin_height_mm, first_pin_height) %>%
         dplyr::ungroup()
 
     # pins averaged up to arms
