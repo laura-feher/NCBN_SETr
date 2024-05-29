@@ -22,13 +22,30 @@
 #' plot_cumu_set(example_sets)
 #' plot_cumu_set(example_sets, columns = 1, pointsize = 2, smooth = FALSE)
 
-plot_cumu_set <- function(data, columns = 4, pointsize = 3.5, scales = "fixed", smooth = TRUE, lty_smooth = 5){
+plot_cumu_set <- function(data, set = NULL, columns = 4, pointsize = 3.5, scales = "fixed", smooth = TRUE, lty_smooth = 5){
 
-    dataf <- calc_change_cumu(data)
+    if(is.null(set)){
+        to_plot <- data
+        plot_title <- 'Cumulative Change by arm position'
+    }
+    else{
+        to_plot <- data %>%
+            dplyr::filter(station_code == !!set)
+
+        station_lab <- data %>%
+            filter(station_code == !!set) %>%
+            distinct(park_code, site_name, station_code) %>%
+            mutate(lab = paste(park_code, site_name, station_code, sep = ", ")) %>%
+            pull(lab)
+
+        plot_title <- paste('Cumulative Change by arm position at\n', station_lab)
+    }
+
+    dataf <- calc_change_cumu(to_plot)
     dataf <- dataf$set
 
     # calculate linear rates of change for each SET/station
-    rates <- calc_set_rates(data)
+    rates <- calc_set_rates(to_plot)
 
     # data needs to be the $set piece of the output from calc_change_cumu
     ggplot2::ggplot(dataf, ggplot2::aes(x = event_date_UTC, y = mean_cumu)) +

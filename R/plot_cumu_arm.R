@@ -18,10 +18,27 @@
 #' plot_cumu_arm(example_sets)
 #' plot_cumu_arm(example_sets, columns = 1, pointsize = 2)
 
-plot_cumu_arm <- function(data, columns = 4, pointsize = 2, scales = "fixed") {
+plot_cumu_arm <- function(data, set = NULL, columns = 4, pointsize = 2, scales = "fixed") {
+
+    if(is.null(set)){
+        to_plot <- data
+        plot_title <- 'Cumulative Change by arm position'
+    }
+    else{
+        to_plot <- data %>%
+            dplyr::filter(station_code == !!set)
+
+        station_lab <- data %>%
+            filter(station_code == !!set) %>%
+            distinct(park_code, site_name, station_code) %>%
+            mutate(lab = paste(park_code, site_name, station_code, sep = ", ")) %>%
+            pull(lab)
+
+        plot_title <- paste('Cumulative Change by arm position at\n', station_lab)
+    }
 
     # first calculate cumulative change for each SET
-    data <- calc_change_cumu(data)
+    data <- calc_change_cumu(to_plot)
     data <- data$arm
 
     # data needs to be the $arm piece of the output from calc_change_cumu
@@ -29,7 +46,7 @@ plot_cumu_arm <- function(data, columns = 4, pointsize = 2, scales = "fixed") {
         ggplot2::geom_point(size = pointsize) +
         ggplot2::geom_line() +
         ggplot2::facet_wrap(~station_code, ncol = columns, scales = scales) +
-        ggplot2::labs(title = 'Cumulative Change by arm position',
+        ggplot2::labs(title = plot_title,
              x = 'Date',
              y = 'Change since first reading (mm)',
              color = "SET direction") +

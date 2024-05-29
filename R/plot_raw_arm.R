@@ -21,8 +21,26 @@
 #' plot_raw_arm(example_sets, columns = 1, pointsize = 3)
 #' plot_raw_arm(example_sets, seline = FALSE)
 
-plot_raw_arm <- function(data, columns = 4, pointsize = 2, seline = TRUE, selinesize = 1, scales = "free_y"){
-    data %>%
+plot_raw_arm <- function(data, set = NULL, columns = 4, pointsize = 2, seline = TRUE, selinesize = 1, scales = "free_y"){
+
+    if(is.null(set)){
+        to_plot <- data
+        plot_title <- 'Pin Height (raw measurement; averaged to SET direction level)'
+    }
+    else{
+        to_plot <- data %>%
+            dplyr::filter(station_code == !!set)
+
+        station_lab <- data %>%
+            filter(station_code == !!set) %>%
+            distinct(park_code, site_name, station_code) %>%
+            mutate(lab = paste(park_code, site_name, station_code, sep = ", ")) %>%
+            pull(lab)
+
+        plot_title <- paste('Pin Height (raw measurement; averaged to SET direction level) at\n', station_lab)
+    }
+
+    to_plot %>%
         dplyr::group_by(network_code, park_code, site_name, station_code, SET_direction, event_date_UTC) %>%
         dplyr::summarize(mean = mean(pin_height_mm, na.rm = TRUE),
                   se = stats::sd(pin_height_mm, na.rm = TRUE)/sqrt(n())) %>%
@@ -37,7 +55,7 @@ plot_raw_arm <- function(data, columns = 4, pointsize = 2, seline = TRUE, seline
         size = selinesize
         )} +
         ggplot2::facet_wrap(~station_code, ncol = columns, scales = scales) +
-        ggplot2::labs(title = 'Pin Height (raw measurement; averaged to SET direction level)',
+        ggplot2::labs(title = plot_title,
              x = 'Date',
              y = 'Mean pin height (mm)',
              color = 'SET direction') +

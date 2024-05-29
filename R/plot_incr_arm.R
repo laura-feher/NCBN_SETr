@@ -35,7 +35,14 @@ plot_incr_arm <- function(data, set = NULL, threshold = 25, columns = 4,
     else{
         to_plot <- data %>%
             dplyr::filter(station_code == !!set)
-        plot_title <- paste('Incremental Change by SET direction at', set)
+
+        station_lab <- data %>%
+            filter(station_code == !!set) %>%
+            distinct(park_code, site_name, station_code) %>%
+            mutate(lab = paste(park_code, site_name, station_code, sep = ", ")) %>%
+            pull(lab)
+
+        plot_title <- paste('Incremental Change by SET direction at\n', station_lab)
     }
 
     ggplot2::ggplot(data = to_plot, ggplot2::aes(x = event_date_UTC,

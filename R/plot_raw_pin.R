@@ -15,6 +15,13 @@
 #' plot_raw_pin(example_sets, "M11-1", scales = "free_y")
 
 plot_raw_pin <- function(data, set, columns = 2, pointsize = 2, scales = "fixed"){
+
+    station_lab <- data %>%
+        filter(station_code == !!set) %>%
+        distinct(park_code, site_name, station_code) %>%
+        mutate(lab = paste(park_code, site_name, station_code, sep = ", ")) %>%
+        pull(lab)
+
     data %>%
         dplyr::filter(station_code == !!set) %>%
         dplyr::group_by(network_code, park_code, site_name, station_code, SET_direction, pin_position, event_date_UTC) %>%
@@ -23,7 +30,7 @@ plot_raw_pin <- function(data, set, columns = 2, pointsize = 2, scales = "fixed"
         ggplot2::geom_line(alpha = 0.6) +
         ggplot2::facet_wrap(~SET_direction, ncol = columns, scales = scales) +
         ggplot2::labs(title = 'Pin Height (raw measurement)',
-             subtitle = rlang::sym(set),
+             subtitle = station_lab,
              x = 'Date',
              y = 'Measured pin height (mm)',
              color = 'Pin') +

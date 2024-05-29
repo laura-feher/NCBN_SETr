@@ -26,6 +26,12 @@ plot_incr_pin <- function(data, set, threshold = 25, columns = 2, pointsize = 2,
     data <- calc_change_incr(data)
     data <- data$pin
 
+    station_lab <- data %>%
+        filter(station_code == !!set) %>%
+        distinct(park_code, site_name, station_code) %>%
+        mutate(lab = paste(park_code, site_name, station_code, sep = ", ")) %>%
+        pull(lab)
+
     # data needs to be the $pin piece of the output from calc_change_inc
     ggplot2::ggplot(data = dplyr::filter(data, station_code == !!set),
                     ggplot2::aes(x = event_date_UTC, y = incr,
@@ -35,10 +41,16 @@ plot_incr_pin <- function(data, set, threshold = 25, columns = 2, pointsize = 2,
         ggplot2::geom_hline(yintercept = -1*threshold, col = "red", size = 1) +
         ggplot2::facet_wrap(~SET_direction, ncol = columns, scales = scales) +
         ggplot2::labs(title = paste('Incremental Change by pin at', set),
-             subtitle = paste('red lines at +/-', threshold, 'mm'),
+             subtitle = station_lab,
+             tag = paste('red lines at +/-', threshold, 'mm'),
              x = 'Date',
              y = 'Change since previous reading (mm)',
              color = 'Pin') +
         ggplot2::theme_bw() +
-        ggplot2::theme(legend.position = 'bottom')
+        ggplot2::theme(
+            legend.position = 'bottom',
+            plot.tag.position = "topright",
+            plot.tag.location = "panel",
+            plot.tag = element_text(color = "red", size = 10)
+            )
 }
