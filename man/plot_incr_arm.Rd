@@ -14,17 +14,17 @@ plot_incr_arm(
 )
 }
 \arguments{
-\item{data}{data frame (e.g. the `$arm` piece of output from `calc_change_incr()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, mean_incr. `mean_incr` should be an already-calculated field of change since previous reading}
+\item{data}{Data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, and pin_height_mm.}
 
-\item{set}{optional SET ID if you only want to look at one SET; default is to graph all SETs}
+\item{set}{optional SET (aka station) ID if you only want to look at one SET; default is to graph all SETs.}
 
-\item{threshold}{numeric value for red horizontal lines (at +/- this value); this should be a value that would be a meaningful threshold for incremental change.}
+\item{threshold}{Numeric value for red horizontal lines (at +/- this value); can be used for QAQC of arm_level incremental change; defaults to 25.}
 
-\item{columns}{number of columns for faceted output}
+\item{columns}{Number of columns you want in the faceted output; defaults to 4.}
 
-\item{pointsize}{size of points you want (goes into the `size` argument of `ggplot2::geom_point`)}
+\item{pointsize}{Size of points you want (goes into the `size` argument of `ggplot2::geom_point`); defaults to 2.}
 
-\item{scales}{passed to `facet_wrap`; same fixed/free options as that function}
+\item{scales}{Do you want axis scales to be the same in all facets ("fixed") or to vary between facets "free_x" or "free_y" or "free" - goes into `scales` arg of `facet_wrap`; defaults to "fixed".}
 }
 \value{
 a ggplot object
@@ -33,8 +33,7 @@ a ggplot object
 Plot change between readings, by SET_direction (i.e., arm)
 }
 \examples{
-incr_set <- calc_change_incr(example_sets)
-plot_incr_arm(incr_set)
-plot_incr_arm(incr_set, threshold = 5, columns = 1)
-plot_incr_arm(incr_set, set = "SET2", threshold = 5)
+plot_incr_arm(example_sets)
+plot_incr_arm(example_sets, threshold = 5, columns = 1)
+plot_incr_arm(example_sets, set = "M11-1", threshold = 5)
 }

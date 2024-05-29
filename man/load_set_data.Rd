@@ -4,14 +4,14 @@
 \alias{load_set_data}
 \title{Calculate Cumulative Change at a SET}
 \usage{
-load_set_data(data_type = "database", file_path = NULL, park_code = NULL)
+load_set_data(park_code = NULL, network_code = NULL, file_path = NULL)
 }
 \arguments{
-\item{data_type}{Either "database" if you want to connect to the NPS SET database (authorized users) or "saved_file" if you have a saved .csv or xlse file.}
+\item{park_code}{optional; A 4 character park code that can be used to filter results from the NPS SET database to a specific park.}
 
-\item{file_path}{If using a saved .csv or .xlsx file, the full file path to the saved file. Must be table with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm.}
+\item{network_code}{optional; A 4 character network code that can be used to filter results from the NPS SET database to a specific I&M network.}
 
-\item{park_code}{A 4 character park code that can be used to filter results from the NPS database to a specific park.}
+\item{file_path}{optional; If, instead of connecting to the NPS SET database, you want to use a saved .csv or .xlsx file, the full file path to the saved file. Must be table with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm.}
 }
 \value{
 A data frame of raw SET data.

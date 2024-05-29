@@ -2,10 +2,11 @@
 % Please edit documentation in R/plot_cumu_set.R
 \name{plot_cumu_set}
 \alias{plot_cumu_set}
-\title{Make a graph of change over time by SET}
+\title{Make a graph of change over time by SET (or station)}
 \usage{
 plot_cumu_set(
   data,
+  set = NULL,
   columns = 4,
   pointsize = 3.5,
   scales = "fixed",
@@ -14,26 +15,25 @@ plot_cumu_set(
 )
 }
 \arguments{
-\item{data}{data frame (e.g. `$set` piece of output from `calc_change_cumu()`) with one row per faceting variable, and the following columns, named exactly: event_date_UTC, set_id, mean_cumu. `mean_cumu` should be an already-calculated field of change since baseline.}
+\item{data}{Data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, and pin_height_mm.}
 
-\item{columns}{number of columns you want in the faceted output}
+\item{columns}{Number of columns you want in the faceted output; defaults to 4.}
 
-\item{pointsize}{size of points you want (goes into the `size` argument of `ggplot2::geom_point`)}
+\item{pointsize}{Size of points you want (goes into the `size` argument of `ggplot2::geom_point`); defaults to 3.5.}
 
-\item{scales}{passed to `facet_wrap`; same fixed/free options as that function}
+\item{scales}{Do you want axis scales to be the same in all facets ("fixed") or to vary between facets "free_x" or "free_y" or "free" - goes into `scales` arg of `facet_wrap`; defaults to "free_y".}
 
-\item{smooth}{do you want a linear regression plotted on top?}
+\item{smooth}{Do you want a linear regression plotted on top? defaults to TRUE.}
 
-\item{lty_smooth}{type of line (1 = solid; 2 and 5 = dashed; normal line types)}
+\item{lty_smooth}{What type of line do you want the linear regression to plot as? 1 = solid; 2 and 5 = dashed; or any of the other line types available in `ggplot2`. defaults to dashed.}
 }
 \value{
 a ggplot object
 }
 \description{
-x-axis is date; y-axis is the average of the 36 pin heights' difference from baseline (first measurement). One facet per SET id.
+x-axis is date; y-axis is the average of the 36 pin heights' difference from baseline (first measurement). One facet per SET/station id.
 }
 \examples{
-cumu_set <- calc_change_cumu(example_sets)
-plot_cumu_set(cumu_set$set)
-plot_cumu_set(cumu_set$set, columns = 1, pointsize = 2, smooth = FALSE)
+plot_cumu_set(example_sets)
+plot_cumu_set(example_sets, columns = 1, pointsize = 2, smooth = FALSE)
 }
