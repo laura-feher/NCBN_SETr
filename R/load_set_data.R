@@ -66,7 +66,7 @@ load_set_data <- function(park_code = NULL, network_code = NULL, file_path = NUL
     }
 
     else if(!is.null(file_path) & stringr::str_detect(file_path, ".csv")) {
-        data <- read.csv(file_path)
+        data <- readr::read_csv(file_path)
     }
 
     else if(!is.null(file_path) & (stringr::str_detect(file_path, ".xls") | stringr::str_detect(file_path, ".xlsx"))) {
