@@ -1,10 +1,12 @@
-#' Calculate Cumulative Change at a SET
+#' Load SET data from database or saved file
 #'
 #' @param park_code optional; A 4 character park code that can be used to filter results from the NPS SET database to a specific park.
 #'
 #' @param network_code optional; A 4 character network code that can be used to filter results from the NPS SET database to a specific I&M network.
 #'
 #' @param file_path optional; If, instead of connecting to the NPS SET database, you want to use a saved .csv or .xlsx file, the full file path to the saved file. Must be table with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm.
+#'
+#' @param db_version optional; If getting data from database, do you want to connect to the production or development version of the database? Default is "production".
 #'
 #' @return A data frame of raw SET data.
 #'
@@ -16,11 +18,19 @@
 #'
 #' load_set_data(data_type = "saved_file", file_path = "C:/Documents/Data/my_SET_data.csv")
 #'
-load_set_data <- function(park_code = NULL, network_code = NULL, file_path = NULL){
+load_set_data <- function(park_code = NULL, network_code = NULL, file_path = NULL, db_version = "production"){
 
     if(is.null(file_path)) {
-    # Set up connection variables
-    database_server <- "inp2300irmadb01.nps.doi.net\\ntwk"
+
+        # Set up connection variables
+
+        if(db_version == "production") {
+            database_server <- "inp2300irmadb01.nps.doi.net\\ntwk"
+        }
+        else if(db_version == "development") {
+            database_server <- "inp2300irmadb04.nps.doi.net\\ntwk"
+        }
+
     database_name <- "SET"
     database_driver <- "ODBC Driver 17 for SQL Server"
 
