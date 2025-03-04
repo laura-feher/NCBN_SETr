@@ -7,7 +7,7 @@ test_that("connects to SET db and returns a data.frame", {
 })
 
 test_that("loads either .xls, .xlsx, or .csv when file_path is given", {
-    expect_type(load_set_data(file_path = "./tests/testthat/testdata/test_list_calc_change_cumu.csv"), "list")
-    expect_type(load_set_data(file_path = "./tests/testthat/testdata/test_list_calc_change_cumu.xls"), "list")
-    expect_type(load_set_data(file_path = "./tests/testthat/testdata/test_list_calc_change_cumu.xlsx"), "list")
+    expect_type(load_set_data(file_path = test_path("testdata", "test_list_calc_change_cumu_set.csv")), "list")
+    expect_type(load_set_data(file_path = test_path("testdata", "test_list_calc_change_cumu_set.xls")), "list")
+    expect_type(load_set_data(file_path = test_path("testdata", "test_list_calc_change_cumu_set.xlsx")), "list")
 })

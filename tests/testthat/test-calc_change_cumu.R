@@ -4,8 +4,8 @@ test_that("message about missing columns shows", {
 })
 
 test_that("returns a list of 3 correctly named objects", {
-    df <- read.csv(test_path("testdata", "test_list_calc_change_cumu.csv"))
+    df <- read.csv(test_path("testdata", "test_list_calc_change_cumu_set.csv"))
     expect_true(is.list(calc_change_cumu(df)))
     expect_length(calc_change_cumu(df), n = 3)
-    expect_named(calc_change_cumu(df), expected = c("pin", "arm", "set"), ignore.order = T)
+    expect_named(calc_change_cumu(df), expected = c("pin", "arm", "station"), ignore.order = T)
 })
