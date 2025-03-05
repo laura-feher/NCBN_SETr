@@ -7,11 +7,11 @@
 plot_hist_arm(data, columns = 4, scales = "free_y")
 }
 \arguments{
-\item{data}{a data frame with one row per pin reading, and the following columns, named exactly: network_code, park_code, site_name, station_code, SET_direction, pin_height_mm}
+\item{data}{Data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, and pin_height_mm.}
 
-\item{columns}{number of columns you'd like in the faceted plot}
+\item{columns}{Number of columns you want in the faceted output; defaults to 4.}
 
-\item{scales}{passed to `facet_wrap` - fixed or free?}
+\item{scales}{Do you want axis scales to be the same in all facets ("fixed") or to vary between facets "free_x" or "free_y" or "free" - goes into `scales` arg of `facet_wrap`; defaults to "free_y".}
 }
 \value{
 a ggplot object

@@ -4,7 +4,7 @@
 \alias{calc_change_cumu}
 \title{Calculate Cumulative Change at a SET}
 \usage{
-calc_change_cumu(dat)
+calc_change_cumu(data)
 }
 \arguments{
 \item{dat}{a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm}

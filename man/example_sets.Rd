@@ -7,18 +7,20 @@
 \format{
 A data frame with 36 rows and 5 variables:
 \describe{
-  \item{date}{measurement date, yyyy-mm-dd format}
-  \item{set_id}{unique name of measured SET}
-  \item{arm_position}{one of two arm positions, each containing three pins (real SETs typically contain measurements for 9 pins on each of 4 arm positions, for 36 measurements on a given date; this dataset has been simplified for illustration)}
-  \item{pin_number}{one of three pins on each arm (real SETs typically contain measurements for 9 pins on each of 4 arm positions, for 36 measurements on a given date; this dataset has been simplified for illustration)}
-  \item{pin_height}{height of pin above arm, in mm (completely made up in this example dataset)}
+  \item{event_date_UTC}{Date UTC; measurement date, yyyy-mm-dd format}
+  \item{network_code}{chr;, 4-letter I&M network code}
+  \item{park_code}{chr; 4-letter NPS park code}
+  \item{site_name}{chr; site name}
+  \item{station_code}{chr; station/SET name}
+  \item{SET_direction}{chr; one of four arm positions ("A", "B", "C", or "D")}
+  \item{pin_position}{int; one of nine pins on each arm}
+  \item{pin_height_mm}{num; height of pin above arm, in mm}
 }
 }
 \usage{
 example_sets
 }
 \description{
-Completely made up, but with
-characteristics of actual SET data
+A sample of data from M11 at ASIS
 }
 \keyword{datasets}
