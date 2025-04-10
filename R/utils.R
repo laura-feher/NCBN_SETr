@@ -6,7 +6,7 @@ detect_data_type <- function(data){
 
         ## conditions: is SET data and has correct columns in data frame
         return("SET")
-        req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm")
+        req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm", "SET_offset_mm", "pin_length_mm")
 
         ## stop and give an informative message if this isn't met
         if(sum(req_clms %in% names(data)) != length(req_clms)){
@@ -36,7 +36,7 @@ detect_set_data <- function(data){
 
         ## conditions: is SET data and has correct columns in data frame
         return("SET")
-        req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm")
+        req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm", "SET_offset_mm", "pin_length_mm")
 
         ## stop and give an informative message if this isn't met
         if(sum(req_clms %in% names(data)) != length(req_clms)){
@@ -61,4 +61,19 @@ detect_mh_data <- function(data){
             stop(paste("Your data frame must have the following columns, with these names, but is missing at least one:", paste(req_clms, collapse = ", ")))
         }
     }
+}
+
+# remove a single grouping level
+drop_groups2 = function(data, ...) {
+
+    groups = map(groups(data), quo)
+    drop = quos(...)
+
+    if(any(!drop %in% groups)) {
+
+                      paste(drop[!drop %in% groups], collapse=", ")
+    }
+
+    data %>% group_by(!!!setdiff(groups, drop))
+
 }
