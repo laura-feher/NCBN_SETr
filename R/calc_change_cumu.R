@@ -12,7 +12,7 @@
 #'   * `"station"`: (default) station-level rates of surface elevation change.
 #'   * `"site"`: site-level rates of surface elevation change.
 #'
-#' @section Data Requirements
+#' @section Data Requirements:
 #'
 #'   This function takes a data frame of either raw SET or MH data (`data`).
 #'
@@ -27,7 +27,9 @@
 #'   marker_horizon_name, core_measurement_number, core_measurement_depth_mm,
 #'   and established_date.
 #'
-#'  @details For SET data, pin-level cumulative change is first calculated as the
+#' @section Details:
+#'
+#'   For SET data, pin-level cumulative change is first calculated as the
 #'   difference between each pin reading and the reading from the earliest date
 #'   that was not NA. Note that for data from NCBN, NCRN, and NETN, pin heights
 #'   are first converted to standardized pin heights using the formula 1000 +

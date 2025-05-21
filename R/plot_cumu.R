@@ -37,9 +37,11 @@
 #'
 #' @inheritSection calc_change_cumu Data Requirements
 #'
-#' @inheritSection calc_change_cumu details
+#' @inheritSection calc_change_cumu Details
 #'
-#' @note Cumulative change is calculated via the function [calc_change_cumu] and
+#' @section Note:
+#'
+#'   Cumulative change is calculated via the function [calc_change_cumu] and
 #'   linear rates of change are calculated via the function [calc_linear_rates].
 #'   See function documentation for details.
 #'

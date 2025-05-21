@@ -8,7 +8,7 @@
 #'
 #' @inheritSection calc_change_cumu Data Requirements
 #'
-#' @inheritSection calc_change_cumu details
+#' @inheritSection calc_change_cumu Details
 #'
 #' @return For SET data, returns a data frame of station- or site-level rates of
 #'   surface elevation change. For MH data, returns a data frame of station- or
@@ -35,17 +35,17 @@
 #' ## exclude station M11-3 from calculations of linear rates
 #' example_sets %>%
 #'     filter(station_code != "M11-3") %>%
-#'     calc_linear_rates(., level = "site)
+#'     calc_linear_rates(., level = "site")
 #'
 #' ## Exclude data from after 2016 from calculations of linear rates
 #' example_sets %>%
 #'     filter(event_date_UTC < as.Date("2016-01-01")) %>%
-#'     calc_change_cumu(., level = "station)
+#'     calc_change_cumu(., level = "station")
 #'
 #' ## Define custom groups for calculating linear rates
 #' example_sets %>%
 #'     group_by(set_type) %>%
-#'     calc_linear_rates(., level = "site)
+#'     calc_linear_rates(., level = "site")
 #'
 calc_linear_rates <- function(data, level = "station"){
 
