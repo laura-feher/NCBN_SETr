@@ -2,26 +2,49 @@
 % Please edit documentation in R/load_set_data.R
 \name{load_set_data}
 \alias{load_set_data}
-\title{Calculate Cumulative Change at a SET}
+\title{Load SET data from database or saved file}
 \usage{
-load_set_data(park_code = NULL, network_code = NULL, file_path = NULL)
+load_set_data(
+  park = NULL,
+  network_code = NULL,
+  file_path = NULL,
+  db_version = "production"
+)
 }
 \arguments{
-\item{park_code}{optional; A 4 character park code that can be used to filter results from the NPS SET database to a specific park.}
+\item{park}{optional; A 4 character park code that can be used to filter
+results from the NPS SET database to a specific park. If not specified,
+will return data for all parks.}
 
-\item{network_code}{optional; A 4 character network code that can be used to filter results from the NPS SET database to a specific I&M network.}
+\item{network_code}{optional; A 4 character network code that can be used to
+filter results from the NPS SET database to a specific I&M network. If not
+specified, will return data for all networks.}
 
-\item{file_path}{optional; If, instead of connecting to the NPS SET database, you want to use a saved .csv or .xlsx file, the full file path to the saved file. Must be table with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm.}
+\item{file_path}{optional; If, instead of connecting to the NPS SET database,
+you want to use a saved .csv or .xlsx file, the full file path to the saved
+file. Must be table with one row per pin reading, and the following
+columns, named exactly: event_date_UTC, network_code, park_code, site_name,
+station_code, SET_direction, pin_position, pin_height_mm.}
+
+\item{db_version}{optional; If getting data from database, do you want to
+connect to the production or development version of the database? Default
+is "production".}
 }
 \value{
 A data frame of raw SET data.
 }
 \description{
-Calculate Cumulative Change at a SET
+Load SET data from database or saved file
+}
+\details{
+Note that you must be on VPN and have read access to the NPS I&M SET
+  database for the database option to work.
 }
 \examples{
 
-load_set_data(data_type = "database")
+load_set_data(park = "ASIS")
+
+load_set_data(network_code = "NCBN", db_version = "development")
 
 load_set_data(data_type = "saved_file", file_path = "C:/Documents/Data/my_SET_data.csv")
 
