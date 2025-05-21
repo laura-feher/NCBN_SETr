@@ -2,20 +2,26 @@
 % Please edit documentation in R/calc_change_cumu.R
 \name{calc_change_cumu}
 \alias{calc_change_cumu}
-\title{Calculate Cumulative Change at a SET}
+\title{Calculate station- or site-level cumulative change for SET or MH data}
 \usage{
-calc_change_cumu(data)
+calc_change_cumu(data, level = "station")
 }
 \arguments{
-\item{dat}{a data frame with one row per pin reading, and the following columns, named exactly: event_date_UTC, network_code, park_code, site_name, station_code, SET_direction, pin_position, pin_height_mm}
+\item{data}{A data frame. A data frame of raw SET or MH data. See details
+below for requirements.}
+
+\item{level}{A string (optional). Level at which to calculate rates of
+surface elevation change or vertical accretion. One of:
+* `"station"`: (default) station-level rates of surface elevation change.
+* `"site"`: site-level rates of surface elevation change.}
 }
 \value{
-a list of three tibbles: one each for pin, arm, and set level calculations. Pin level change is calculated first, as the difference between a pin reading and the reading from the earliest date at that set_id--arm--pin. If the first reading was NA, the entire pin's cumulative readings will be NA. The column name in the $pin tibble is "cumu". For every date of a pin reading, this calculated value will exist. On the first date, it is 0. Cumulative pin changes are then averaged to the arm position level on each date, excluding NAs. St Deviation and St Error are also calculated. There is one calculated value for every arm on every reading date. These columns in the $arm tibble are "mean_cumu", "sd_cumu", and "se_cumu". The cumulative arm changes are then averaged to the SET level, also with st dev and st err. There is one calculated value for every SET on every reading date. The columns in the $set tibble are again "mean_cumu", "sd_cumu", and "se_cumu".
+For SET data, returns a data frame of station- or site-level
+ cumulative surface elevation change. For MH data, returns a data frame of
+ station- or site-level vertical accretion.
 }
 \description{
-Calculate Cumulative Change at a SET
-}
-\examples{
-calc_change_cumu(example_sets)
-
+This function takes a data frame of raw SET or MH data and calculates
+cumulative surface elevation change (for SET data) or vertical accretion (for
+MH data) on each measurement date at either the station- or site-level.
 }

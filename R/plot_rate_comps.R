@@ -79,7 +79,7 @@
 #' # Site-level rates
 #' plot_set_rate_comps(data = example_sets, level = "site")
 #'
-plot_rate_comps <- function(data = NULL, rates = NULL, data_type, level = "station"){
+plot_rate_comps <- function(data = NULL, rates = NULL, level = "station"){
 
     if(level == "station") {
 
@@ -115,9 +115,9 @@ plot_rate_comps <- function(data = NULL, rates = NULL, data_type, level = "stati
              geom_vline(aes(xintercept = 0), color = "gray70", linetype = "dashed") +
              geom_errorbar(aes(y = station_code, xmin = rate - rate_se, xmax = rate + rate_se), color = "gray55", linewidth = 1) +
              geom_point(size = 3, color = "red3") +
-             {if(data_type == "SET")
+             {if(raw_data_type == "SET")
                  labs(title = "Rates of surface elevation change ± 1 standard error (mm/yr)", x = "Rate of surface elevation change (mm/yr)", y = "Station")
-                 else if(data_type == "MH")
+                 else if(raw_data_type == "MH")
                      labs(title = "Rates of vertical accretion change ± 1 standard error (mm/yr)", x = "Rate of vertical accretion (mm/yr)", y = "Station")}
 
     } else if(level == "site") {
@@ -154,9 +154,9 @@ plot_rate_comps <- function(data = NULL, rates = NULL, data_type, level = "stati
              geom_vline(aes(xintercept = 0), color = "gray70", linetype = "dashed") +
              geom_errorbar(aes(y = site_name, xmin = rate - rate_se, xmax = rate + rate_se), color = "gray55", linewidth = 1) +
              geom_point(size = 3, color = "red3") +
-             {if(data_type == "SET")
+             {if(raw_data_type == "SET")
                  labs(title = "Rates of surface elevation change ± 1 standard error (mm/yr)", x = "Rate of surface elevation change (mm/yr)", y = "Site")
-                 else if(data_type == "MH")
+                 else if(raw_data_type == "MH")
                      labs(title = "Rates of vertical accretion ± 1 standard error (mm/yr)", x = "Rate of vertical accretion (mm/yr)", y = "Site")}
 
     }
