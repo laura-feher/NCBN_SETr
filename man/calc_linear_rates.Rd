@@ -31,3 +31,65 @@ Stations with fewer than 3 measurement dates are excluded from the
   calculation of rates. Cumulative change is calculated via the function
   [calc_change_cumu] - see function documentation for details.
 }
+\section{Data Requirements}{
+
+
+  This function takes a data frame of either raw SET or MH data (`data`).
+
+  SET data must have 1 row per pin reading and the following columns, named
+  exactly: event_date_UTC, network_code, park_code, site_name, station_code,
+  SET_direction, pin_position, SET_offset_mm, pin_length_mm, and
+  pin_height_mm. Note that SET_offset_mm and pin_length_mm can be NA (aka
+  blanks) but the columns must be included in the data frame.
+
+  MH data must have 1 row per core measurement and the following columns,
+  named exactly: event_date_UTC, network_code, park_code, site_name,
+  marker_horizon_name, core_measurement_number, core_measurement_depth_mm,
+  and established_date.
+}
+
+\section{Details}{
+
+
+  For SET data, pin-level cumulative change is first calculated as the
+  difference between each pin reading and the reading from the earliest date
+  that was not NA. Note that for data from NCBN, NCRN, and NETN, pin heights
+  are first converted to standardized pin heights using the formula 1000 +
+  (SET_offset_mm - (pin_length_mm - pin_height_mm)) to account for the 6"
+  extensions that were added to some benchmarks within these networks' parks
+  in 2023/24. Then, cumulative pin changes are averaged to the arm-level on
+  each date, and then the cumulative arm-level changes are averaged up to the
+  station-level on each date. If level = "site" is used, station-level
+  cumulative change will be averaged up to the site-level.
+
+  For MH data, duplicate core readings ('core_measurement_number') are first
+  averaged to the marker horizon-level. Then, average marker horizon depths
+  are averaged up to the station-level on each date, excluding NAs. If level
+  = "site" is used, station-level cumulative change will be averaged up to
+  the site-level.
+}
+
+\examples{
+# Defaults to station-level rates
+calc_linear_rates(example_sets)
+
+# Site-level cumulative change
+calc_linear_rates(example_mh, level = "site")
+
+# Can also be used with pipes to include/exclude specific stations, dates, etc.
+## exclude station M11-3 from calculations of linear rates
+example_sets \%>\%
+    filter(station_code != "M11-3") \%>\%
+    calc_linear_rates(., level = "site")
+
+## Exclude data from after 2016 from calculations of linear rates
+example_sets \%>\%
+    filter(event_date_UTC < as.Date("2016-01-01")) \%>\%
+    calc_change_cumu(., level = "station")
+
+## Define custom groups for calculating linear rates
+example_sets \%>\%
+    group_by(set_type) \%>\%
+    calc_linear_rates(., level = "site")
+
+}

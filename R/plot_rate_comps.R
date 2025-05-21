@@ -24,7 +24,7 @@
 #'   * `"station"`: (default) station-level rates of surface elevation change.
 #'   * `"site"`: site-level rates of surface elevation change.
 #'
-#' @section Data Requirements
+#' @section Data Requirements:
 #'
 #'   This function takes a data frame of either raw SET data (`data`) or a
 #'   user-created data frame of station- or site-level rates of surface
@@ -55,7 +55,7 @@
 #'   site_name, rate, and rate_se. The "rate" and "rate_se" columns should
 #'   represent the site-level rates and their standard errors (respectively).
 #'
-#' @inheritSection plot_cumu note
+#' @inheritSection plot_cumu Note
 #'
 #' @return a ggplot object
 #'

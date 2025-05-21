@@ -35,6 +35,47 @@ This function creates a 'TIE fighter' style plot that can be
   frame of pre-calculated station- or site-level rates of surface elevation
   change (`rates` argument).
 }
+\section{Data Requirements}{
+
+
+  This function takes a data frame of either raw SET data (`data`) or a
+  user-created data frame of station- or site-level rates of surface
+  elevation change (`rates`).
+
+  If supplying `data` and `data_type = "SET"`, raw SET data must have 1 row
+  per pin reading and the following columns, named exactly: event_date_UTC,
+  network_code, park_code, site_name, station_code, SET_direction,
+  pin_position, SET_offset_mm, pin_length_mm, and pin_height_mm. Note that
+  SET_offset_mm and pin_length_mm can be NA (aka blanks) but the columns must
+  be included in the data frame.
+
+  If supplying `data` and `data_type = "MH"`, raw MH data must have 1 row per
+  core measurement and the following columns, named exactly: event_date_UTC,
+  network_code, park_code, site_name, station_code, marker_horizon_name,
+  core_measurement_number, core_measurement_depth_mm, and established_date
+
+  If supplying a user created data frame to  `rates` and `level = station`,
+  must be a data frame of station-level rates of surface elevation change or
+  vertical accretion with 1 row per station and the following columns, named
+  exactly: station_code, rate, and rate_se. The "rate" and "rate_se" columns
+  should represent the station-level rates and their standard errors
+  (respectively).
+
+  If supplying a user created data frame to `rates` and `level = site`, must
+  be a data frame of site-level rates of surface elevation change or vertical
+  accretion with 1 row per site and the following columns, named exactly:
+  site_name, rate, and rate_se. The "rate" and "rate_se" columns should
+  represent the site-level rates and their standard errors (respectively).
+}
+
+\section{Note}{
+
+
+  Cumulative change is calculated via the function [calc_change_cumu] and
+  linear rates of change are calculated via the function [calc_linear_rates].
+  See function documentation for details.
+}
+
 \examples{
 
 # Default plot gives station-level rates
