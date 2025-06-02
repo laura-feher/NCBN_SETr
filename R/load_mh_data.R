@@ -88,7 +88,7 @@ load_mh_data <- function(park = NULL, network_code = NULL, file_path = NULL, db_
         }
 
         # or return the whole database
-        else if(is.null(park_code) & is.null(network_code)) {
+        else if(is.null(park) & is.null(network_code)) {
             data <- DBI::dbGetQuery(con, 'SELECT * FROM ssrs.vw_dbx_marker_horizon_data')
         }
 

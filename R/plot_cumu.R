@@ -55,6 +55,7 @@
 #' @import ggplot2
 #' @import dplyr
 #' @importFrom ggh4x scale_listed
+#' @importFrom tidyr unite
 #'
 #' @examples
 #' # Station-level cumulative change
@@ -86,46 +87,61 @@
 #'
 plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_type = NULL, columns = 4, pointsize = 2, scales = "fixed") {
 
+    base_plot <- function(df, data_type) {
+
+        if(data_type == "SET") {
+            title_lab <- "Cumulative surface elevation change by "
+            y_lab <- "Cumulative surface elevation change (mm) "
+            line_color <- "lightsteelblue4"
+            smooth_color <- "steelblue4"
+            point_fill_color <- "lightsteelblue1"
+            point_outline_color <- "steelblue3"
+        } else if(data_type == "MH") {
+            title_lab <- "Cumulative vertical accretion by "
+            y_lab <- "Cumulative vertical accretion (mm) "
+            line_color <- "indianred4"
+            smooth_color <- "tomato4"
+            point_fill_color <- "indianred1"
+            point_outline_color <- "tomato3"
+        }
+
+        ggplot(df, aes(x = event_date_UTC, y = mean_cumu)) +
+            geom_line(color = line_color) +
+            geom_smooth(formula = y~x, se = FALSE, method = "lm", color = smooth_color, linewidth = 1) +
+            geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
+            geom_point(shape = 21, fill = point_fill_color, color = point_outline_color, size = pointsize, alpha = 0.9) +
+            facet_wrap(~grouping, ncol = columns, scales = scales) +
+            labs(title = paste0(title_lab, level), x = "Date", y = y_lab) +
+            theme_classic()
+    }
+
     if(!is.null(SET_data) & is.null(MH_data)) {
 
         # make sure SET_data is SET data
         data_type <- detect_data_type(SET_data)
 
         if(data_type != "SET") {
-            stop(paste0("SET_data must be SET data"))
+            stop(paste0("SET_data must be valid SET data. See 'data requirements' in the documentation for `calc_change_cumu()`."))
         } else {
             if(level == "station") {
+
+                groups <- SET_data %>%
+                    calc_change_cumu(., level = "station") %>%
+                    attr(., "groups") %>%
+                    select(-c(network_code, park_code, site_name, ".rows")) %>%
+                    colnames()
 
                 # plot
                 p <- SET_data %>%
                     calc_change_cumu(., level = "station") %>%
-                    ggplot(., aes(x = event_date_UTC, y = mean_cumu)) +
-                    geom_line(color = 'lightsteelblue4') +
-                    geom_smooth(formula = y~x, se = FALSE, method = 'lm', color = 'steelblue4', linewidth = 1) +
-                    geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
-                    geom_point(shape = 21, fill = 'lightsteelblue1', color = 'steelblue3', size = pointsize, alpha = 0.9) +
-                    facet_wrap(~station_code, ncol = columns, scales = scales) +
-                    labs(title = 'Cumulative surface elevation change by station', x = 'Date', y = 'Cumulative surface elevation change (mm)') +
-                    theme_classic()
+                    tidyr::unite("grouping", all_of(groups), remove = FALSE) %>%
+                    base_plot(., data_type = data_type)
 
                 if(is.null(rate_type)) {
-                  p
+                    p
                 } else if(rate_type == "linear") {
 
-                    set_rates <- SET_data %>%
-                        calc_linear_rates(., level = "station") %>%
-                        mutate(format_rate = if_else(abs(round(rate, 2)) >= 0.01, format(round(rate, 2), nsmall = 2), as.character(signif(rate))),
-                               format_rate_se = if_else(abs(round(rate_se, 2)) >= 0.01, format(round(rate_se, 2), nsmall = 2), as.character(signif(rate_se))),
-                               format_r2  = format(round(rate_r2, 2), nsmall =2),
-                               format_p = case_when(rate_p > 0.05 ~ "ns",
-                                                    rate_p <= 0.05 & rate_p > 0.01 ~ "0.05",
-                                                    rate_p <= 0.01 & rate_p > 0.001 ~ "0.01",
-                                                    rate_p <= 0.001 ~ "0.001")) %>%
-                        mutate(rate_label = paste0("SEC: ", format_rate, " ± ", format_rate_se, " mm/yr"),
-                               r2p_label = if_else(rate_p > 0.05,
-                                                  deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"="~italic(.(format_p)))),
-                                                  deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"<"~.(format_p)))
-                               ))
+                    set_rates <- plot_rate_labels(data = SET_data, level = level, groups = groups, data_type = data_type)
 
                     p +
                         geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 1.5) +
@@ -134,36 +150,23 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
 
             } else if(level == "site") {
 
+                groups <- SET_data %>%
+                    calc_change_cumu(., level = "site") %>%
+                    attr(., "groups") %>%
+                    select(-c(network_code, park_code, ".rows")) %>%
+                    colnames()
+
                 #plot
                 p <- SET_data %>%
                     calc_change_cumu(., level = "site") %>%
-                    ggplot(., aes(x = event_date_UTC, y = mean_cumu)) +
-                    geom_line(color = 'lightsteelblue4') +
-                    geom_smooth(formula = y~x, se = FALSE, method = 'lm', color = 'steelblue4', linewidth = 1) +
-                    geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
-                    geom_point(shape = 21, fill = 'lightsteelblue1', color = 'steelblue3', size = pointsize, alpha = 0.9) +
-                    facet_wrap(~site_name, ncol = columns, scales = scales) +
-                    labs(title = 'Cumulative surface elevation change by site', x = 'Date', y = 'Cumulative surface elevation change (mm)') +
-                    theme_classic()
+                    tidyr::unite("grouping", all_of(groups), remove = FALSE) %>%
+                    base_plot(., data_type = data_type)
 
                 if(is.null(rate_type)) {
                     p
                 } else if(rate_type == "linear") {
 
-                    set_rates <- SET_data %>%
-                        calc_linear_rates(., level = "site") %>%
-                        mutate(format_rate = if_else(abs(round(rate, 2)) >= 0.01, format(round(rate, 2), nsmall = 2), as.character(signif(rate))),
-                               format_rate_se = if_else(abs(round(rate_se, 2)) >= 0.01, format(round(rate_se, 2), nsmall = 2), as.character(signif(rate_se))),
-                               format_r2  = format(round(rate_r2, 2), nsmall =2),
-                               format_p = case_when(rate_p > 0.05 ~ "ns",
-                                                    rate_p <= 0.05 & rate_p > 0.01 ~ "0.05",
-                                                    rate_p <= 0.01 & rate_p > 0.001 ~ "0.01",
-                                                    rate_p <= 0.001 ~ "0.001")) %>%
-                        mutate(rate_label = paste0("SEC: ", format_rate, " ± ", format_rate_se, " mm/yr"),
-                               r2p_label = if_else(rate_p > 0.05,
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"="~italic(.(format_p)))),
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"<"~.(format_p)))
-                               ))
+                    set_rates <- plot_rate_labels(data = SET_data, level = level, groups = groups, data_type = data_type)
 
                     p +
                         geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 1.5) +
@@ -177,40 +180,27 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
         data_type <- detect_data_type(MH_data)
 
         if(data_type != "MH") {
-            stop(paste0("MH_data must be MH data"))
+            stop(paste0("MH_data must be valid MH data. See 'data requirements' in the documentation for `calc_change_cumu()`."))
         } else {
             if(level == "station") {
+
+                groups <- MH_data %>%
+                    calc_change_cumu(., level = "station") %>%
+                    attr(., "groups") %>%
+                    select(-c(network_code, park_code, site_name, ".rows")) %>%
+                    colnames()
 
                 # plot
                 p <- MH_data %>%
                     calc_change_cumu(., level = "station") %>%
-                    ggplot(., aes(x = event_date_UTC, y = mean_cumu)) +
-                    geom_line(color = 'indianred4') +
-                    geom_smooth(formula = y~x, se = FALSE, method = 'lm', color = 'tomato4', linewidth = 1) +
-                    geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
-                    geom_point(shape = 21, fill = 'indianred1', col = 'tomato3', size = pointsize, alpha = 0.9) +
-                    facet_wrap(~station_code, ncol = columns, scales = scales) +
-                    labs(title = 'Cumulative vertical accretion by station', x = 'Date', y = 'Cumulative vertical accretion (mm)') +
-                    theme_classic()
+                    tidyr::unite("grouping", all_of(groups), remove = FALSE) %>%
+                    base_plot(., data_type = data_type)
 
                 if(is.null(rate_type)) {
                     p
                 } else if(rate_type == "linear") {
 
-                    mh_rates <- MH_data %>%
-                        calc_linear_rates(., level = "station") %>%
-                        mutate(format_rate = if_else(abs(round(rate, 2)) >= 0.01, format(round(rate, 2), nsmall = 2), as.character(signif(rate))),
-                               format_rate_se = if_else(abs(round(rate_se, 2)) >= 0.01, format(round(rate_se, 2), nsmall = 2), as.character(signif(rate_se))),
-                               format_r2  = format(round(rate_r2, 2), nsmall =2),
-                               format_p = case_when(rate_p > 0.05 ~ "ns",
-                                                    rate_p <= 0.05 & rate_p > 0.01 ~ "0.05",
-                                                    rate_p <= 0.01 & rate_p > 0.001 ~ "0.01",
-                                                    rate_p <= 0.001 ~ "0.001")) %>%
-                        mutate(rate_label = paste0("VA: ", format_rate, " ± ", format_rate_se, " mm/yr"),
-                               r2p_label = if_else(rate_p > 0.05,
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"="~italic(.(format_p)))),
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"<"~.(format_p)))
-                               ))
+                    mh_rates <- plot_rate_labels(data = MH_data, level = level, groups = groups, data_type = data_type)
 
                     p +
                         geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 1.5) +
@@ -219,36 +209,23 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
 
             } else if(level == "site") {
 
+                groups <- MH_data %>%
+                    calc_change_cumu(., level = "site") %>%
+                    attr(., "groups") %>%
+                    select(-c(network_code, park_code, ".rows")) %>%
+                    colnames()
+
                 # plot
                 p <- MH_data %>%
                     calc_change_cumu(., level = "site") %>%
-                    ggplot(., aes(x = event_date_UTC, y = mean_cumu)) +
-                    geom_line(color = 'indianred4') +
-                    geom_smooth(formula = y~x, se = FALSE, method = 'lm', color = 'tomato4', linewidth = 1) +
-                    geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
-                    geom_point(shape = 21, fill = 'indianred1', col = 'tomato3', size = pointsize, alpha = 0.9) +
-                    facet_wrap(~site_name, ncol = columns, scales = scales) +
-                    labs(title = 'Cumulative vertical accretion by site', x = 'Date', y = 'Cumulative vertical accretion (mm)') +
-                    theme_classic()
+                    tidyr::unite("grouping", all_of(groups), remove = FALSE) %>%
+                    base_plot(., data_type = data_type)
 
                 if(is.null(rate_type)) {
                     p
                 } else if(rate_type == "linear") {
 
-                    mh_rates <- MH_data %>%
-                        calc_linear_rates(., level = "site") %>%
-                        mutate(format_rate = if_else(abs(round(rate, 2)) >= 0.01, format(round(rate, 2), nsmall = 2), as.character(signif(rate))),
-                               format_rate_se = if_else(abs(round(rate_se, 2)) >= 0.01, format(round(rate_se, 2), nsmall = 2), as.character(signif(rate_se))),
-                               format_r2  = format(round(rate_r2, 2), nsmall =2),
-                               format_p = case_when(rate_p > 0.05 ~ "ns",
-                                                    rate_p <= 0.05 & rate_p > 0.01 ~ "0.05",
-                                                    rate_p <= 0.01 & rate_p > 0.001 ~ "0.01",
-                                                    rate_p <= 0.001 ~ "0.001")) %>%
-                        mutate(rate_label = paste0("VA: ", format_rate, " ± ", format_rate_se, " mm/yr"),
-                               r2p_label = if_else(rate_p > 0.05,
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"="~italic(.(format_p)))),
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"<"~.(format_p)))
-                               ))
+                    mh_rates <- plot_rate_labels(data = MH_data, level = level, groups = groups, data_type = data_type)
 
                     p +
                         geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 1.5) +
@@ -265,163 +242,138 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
         data_type_MH <- detect_data_type(MH_data)
 
         if(data_type_SET != "SET") {
-            stop(paste0("must be a valid SET data frame"))
+            stop(paste0("SET_data must be a valid SET data frame. See 'data requirements' in the documentation for `calc_change_cumu()`."))
         } else if(data_type_MH != "MH") {
-            stop(paste0("must be a valid MH data frame"))
+            stop(paste0("MH_data must be a valid MH data frame. See 'data requirements' in the documentation for `calc_change_cumu()`."))
         } else if(data_type_SET != "SET" & data_type_MH != "MH") {
-            stop(paste0("SET_data must be a valid SET data frame and MH_data must be a valid MH data frame"))
+            stop(paste0("SET_data must be a valid SET data frame and MH_data must be a valid MH data frame. See 'data requirements' in the documentation for `calc_change_cumu()`."))
         } else {
+
+            SET_MH_base_plot <- function(df) {
+
+                suppressWarnings(
+                    ggplot(df, aes(x = event_date_UTC, y = mean_cumu, group = data_type)) +
+                        geom_line(aes(color1 = data_type)) +
+                        geom_smooth(aes(color2 = data_type), formula = y~x, se = FALSE, method = 'lm', linewidth = 1) +
+                        geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
+                        geom_point(aes(fill = data_type, color3 = data_type), shape = 21, size = pointsize, alpha = 0.9) +
+                        facet_wrap(~grouping, ncol = columns, scales = scales) +
+                        ggh4x::scale_listed(scalelist = list(
+                            scale_colour_manual(values = c('lightsteelblue4', 'indianred4'), aesthetics = "color1", breaks = c("SET", "MH")),
+                            scale_colour_manual(values = c('steelblue4', 'tomato4'), aesthetics = "color2", breaks = c("SET", "MH")),
+                            scale_colour_manual(values = c('steelblue3', 'tomato3'), aesthetics = "color3", breaks = c("SET", "MH")),
+                            scale_fill_manual(values = c('lightsteelblue1', 'indianred1'), breaks = c("SET", "MH"))
+                        ), replaces = c("color", "color", "color", "fill")) +
+                        labs(title = paste0('Cumulative surface elevation change and\nvertical accretion by ', level), x = 'Date', y = 'Cumulative surface elevation change and\nvertical accretion (mm)') +
+                        theme_classic() +
+                        theme(
+                            legend.title = element_blank()
+                        )
+                )
+            }
 
             if(level == "station") {
 
                 # calculative cumulative change for SET and MH data
-                plot_df_SET <- SET_data %>%
+                SET_groups <- SET_data %>%
                     calc_change_cumu(., level = "station") %>%
-                    mutate(data_type = "SET")
+                    attr(., "groups") %>%
+                    select(-c(network_code, park_code, site_name, ".rows")) %>%
+                    colnames()
 
-                plot_df_MH <- MH_data %>%
+                MH_groups <- MH_data %>%
                     calc_change_cumu(., level = "station") %>%
-                    select(-established_date) %>%
-                    mutate(data_type = "MH")
+                    attr(., "groups") %>%
+                    select(-c(network_code, park_code, site_name, ".rows")) %>%
+                    colnames()
 
-                plot_df <- bind_rows(plot_df_SET, plot_df_MH)
+                if(identical(SET_groups, MH_groups) == FALSE) {
+                    stop(print("SET and MH data must have the same grouping in order to plot them together."))
+                } else {
 
-                # plot data
-                p <- ggplot(plot_df, aes(x = event_date_UTC, y = mean_cumu, group = data_type)) +
-                    geom_line(aes(color1 = data_type)) +
-                    geom_smooth(aes(color2 = data_type), formula = y~x, se = FALSE, method = 'lm', linewidth = 1) +
-                    geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
-                    geom_point(aes(fill = data_type, color3 = data_type), shape = 21, size = pointsize, alpha = 0.9) +
-                    facet_wrap(~station_code, ncol = columns, scales = scales) +
-                    ggh4x::scale_listed(scalelist = list(
-                        scale_colour_manual(values = c('lightsteelblue4', 'indianred4'), aesthetics = "color1", breaks = c("SET", "MH")),
-                        scale_colour_manual(values = c('steelblue4', 'tomato4'), aesthetics = "color2", breaks = c("SET", "MH")),
-                        scale_colour_manual(values = c('steelblue3', 'tomato3'), aesthetics = "color3", breaks = c("SET", "MH")),
-                        scale_fill_manual(values = c('lightsteelblue1', 'indianred1'), breaks = c("SET", "MH"))
-                    ), replaces = c("color", "color", "color", "fill")) +
-                    labs(title = 'Cumulative surface elevation change and vertical accretion by station', x = 'Date', y = 'Cumulative surface elevation change and vertical accretion (mm)') +
-                    theme_classic() +
-                    theme(
-                        legend.title = element_blank()
-                    )
-
-                if(is.null(rate_type)) {
-                    p
-                } else if(rate_type == "linear") {
-
-                    set_rates <- SET_data %>%
-                        calc_linear_rates(., level = "station") %>%
-                        mutate(format_rate = if_else(abs(round(rate, 2)) >= 0.01, format(round(rate, 2), nsmall = 2), as.character(signif(rate))),
-                               format_rate_se = if_else(abs(round(rate_se, 2)) >= 0.01, format(round(rate_se, 2), nsmall = 2), as.character(signif(rate_se))),
-                               format_r2  = format(round(rate_r2, 2), nsmall =2),
-                               format_p = case_when(rate_p > 0.05 ~ "ns",
-                                                    rate_p <= 0.05 & rate_p > 0.01 ~ "0.05",
-                                                    rate_p <= 0.01 & rate_p > 0.001 ~ "0.01",
-                                                    rate_p <= 0.001 ~ "0.001")) %>%
-                        mutate(rate_label = paste0("SEC: ", format_rate, " ± ", format_rate_se, " mm/yr"),
-                               r2p_label = if_else(rate_p > 0.05,
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"="~italic(.(format_p)))),
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"<"~.(format_p)))
-                               )) %>%
+                    plot_df_SET <- SET_data %>%
+                        calc_change_cumu(., level = "station") %>%
+                        tidyr::unite("grouping", all_of(SET_groups), remove = FALSE) %>%
                         mutate(data_type = "SET")
 
-                    mh_rates <- MH_data %>%
-                        calc_linear_rates(., level = "station") %>%
-                        mutate(format_rate = if_else(abs(round(rate, 2)) >= 0.01, format(round(rate, 2), nsmall = 2), as.character(signif(rate))),
-                               format_rate_se = if_else(abs(round(rate_se, 2)) >= 0.01, format(round(rate_se, 2), nsmall = 2), as.character(signif(rate_se))),
-                               format_r2  = format(round(rate_r2, 2), nsmall =2),
-                               format_p = case_when(rate_p > 0.05 ~ "ns",
-                                                    rate_p <= 0.05 & rate_p > 0.01 ~ "0.05",
-                                                    rate_p <= 0.01 & rate_p > 0.001 ~ "0.01",
-                                                    rate_p <= 0.001 ~ "0.001")) %>%
-                        mutate(rate_label = paste0("VA: ", format_rate, " ± ", format_rate_se, " mm/yr"),
-                               r2p_label = if_else(rate_p > 0.05,
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"="~italic(.(format_p)))),
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"<"~.(format_p)))
-                               )) %>%
+                    plot_df_MH <- MH_data %>%
+                        calc_change_cumu(., level = "station") %>%
+                        tidyr::unite("grouping", all_of(SET_groups), remove = FALSE) %>%
                         mutate(data_type = "MH")
 
-                    p +
-                        geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 1.5) +
-                        geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.2, vjust = 2.1) +
-                        geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 6) +
-                        geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.15, vjust = 4.9)
+                    plot_df <- bind_rows(plot_df_SET, plot_df_MH)
+
+                    # plot data
+                    p <- SET_MH_base_plot(df = plot_df)
+
+                    if(is.null(rate_type)) {
+                        p
+                    } else if(rate_type == "linear") {
+
+                        set_rates <- plot_rate_labels(data = SET_data, level = level, groups = SET_groups, data_type = "SET") %>%
+                            mutate(data_type = "SET")
+
+                        mh_rates <- plot_rate_labels(data = MH_data, level = level, groups = MH_groups, data_type = "MH") %>%
+                            mutate(data_type = "MH")
+
+                        p +
+                            geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 1.5) +
+                            geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.2, vjust = 2.1) +
+                            geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 6) +
+                            geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.15, vjust = 4.9)
+                    }
                 }
 
             } else if(level == "site") {
 
                 # calculative cumulative change for SET and MH data
-                plot_df_SET <- SET_data %>%
+                SET_groups <- SET_data %>%
                     calc_change_cumu(., level = "site") %>%
-                    mutate(data_type = "SET")
+                    attr(., "groups") %>%
+                    select(-c(network_code, park_code, ".rows")) %>%
+                    colnames()
 
-                plot_df_MH <- MH_data %>%
+                MH_groups <- MH_data %>%
                     calc_change_cumu(., level = "site") %>%
-                    select(-established_date) %>%
-                    mutate(data_type = "MH")
+                    attr(., "groups") %>%
+                    select(-c(network_code, park_code, ".rows")) %>%
+                    colnames()
 
-                plot_df <- bind_rows(plot_df_SET, plot_df_MH)
+                if(identical(SET_groups, MH_groups) == FALSE) {
+                    stop(print("SET and MH data must have the same grouping in order to plot them together."))
+                } else {
 
-                # plot data
-                p <- ggplot(plot_df, aes(x = event_date_UTC, y = mean_cumu, group = data_type)) +
-                    geom_line(aes(color1 = data_type)) +
-                    geom_smooth(aes(color2 = data_type), formula = y~x, se = FALSE, method = 'lm', linewidth = 1) +
-                    geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
-                    geom_point(aes(fill = data_type, color3 = data_type), shape = 21, size = pointsize, alpha = 0.9) +
-                    facet_wrap(~site_name, ncol = columns, scales = scales) +
-                    ggh4x::scale_listed(scalelist = list(
-                        scale_colour_manual(values = c('lightsteelblue4', 'indianred4'), aesthetics = "color1", breaks = c("SET", "MH")),
-                        scale_colour_manual(values = c('steelblue4', 'tomato4'), aesthetics = "color2", breaks = c("SET", "MH")),
-                        scale_colour_manual(values = c('steelblue3', 'tomato3'), aesthetics = "color3", breaks = c("SET", "MH")),
-                        scale_fill_manual(values = c('lightsteelblue1', 'indianred1'), breaks = c("SET", "MH"))
-                    ), replaces = c("color", "color", "color", "fill")) +
-                    labs(title = 'Cumulative surface elevation change and vertical accretion by site', x = 'Date', y = 'Cumulative surface elevation change and vertical accretion (mm)') +
-                    theme_classic() +
-                    theme(
-                        legend.title = element_blank()
-                    )
-
-                if(is.null(rate_type)) {
-                    p
-                } else if(rate_type == "linear") {
-
-                    set_rates <- SET_data %>%
-                        calc_linear_rates(., level = "site") %>%
-                        mutate(format_rate = if_else(abs(round(rate, 2)) >= 0.01, format(round(rate, 2), nsmall = 2), as.character(signif(rate))),
-                               format_rate_se = if_else(abs(round(rate_se, 2)) >= 0.01, format(round(rate_se, 2), nsmall = 2), as.character(signif(rate_se))),
-                               format_r2  = format(round(rate_r2, 2), nsmall =2),
-                               format_p = case_when(rate_p > 0.05 ~ "ns",
-                                                    rate_p <= 0.05 & rate_p > 0.01 ~ "0.05",
-                                                    rate_p <= 0.01 & rate_p > 0.001 ~ "0.01",
-                                                    rate_p <= 0.001 ~ "0.001")) %>%
-                        mutate(rate_label = paste0("SEC: ", format_rate, " ± ", format_rate_se, " mm/yr"),
-                               r2p_label = if_else(rate_p > 0.05,
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"="~italic(.(format_p)))),
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"<"~.(format_p)))
-                               )) %>%
+                    plot_df_SET <- SET_data %>%
+                        calc_change_cumu(., level = "site") %>%
+                        tidyr::unite("grouping", all_of(SET_groups), remove = FALSE) %>%
                         mutate(data_type = "SET")
 
-                    mh_rates <- MH_data %>%
-                        calc_linear_rates(., level = "site") %>%
-                        mutate(format_rate = if_else(abs(round(rate, 2)) >= 0.01, format(round(rate, 2), nsmall = 2), as.character(signif(rate))),
-                               format_rate_se = if_else(abs(round(rate_se, 2)) >= 0.01, format(round(rate_se, 2), nsmall = 2), as.character(signif(rate_se))),
-                               format_r2  = format(round(rate_r2, 2), nsmall =2),
-                               format_p = case_when(rate_p > 0.05 ~ "ns",
-                                                    rate_p <= 0.05 & rate_p > 0.01 ~ "0.05",
-                                                    rate_p <= 0.01 & rate_p > 0.001 ~ "0.01",
-                                                    rate_p <= 0.001 ~ "0.001")) %>%
-                        mutate(rate_label = paste0("VA: ", format_rate, " ± ", format_rate_se, " mm/yr"),
-                               r2p_label = if_else(rate_p > 0.05,
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"="~italic(.(format_p)))),
-                                                   deparse(bquote(italic(r)^2~"="~.(format_r2)*plain(",")~italic(p)~"<"~.(format_p)))
-                               )) %>%
+                    plot_df_MH <- MH_data %>%
+                        calc_change_cumu(., level = "site") %>%
+                        tidyr::unite("grouping", all_of(SET_groups), remove = FALSE) %>%
                         mutate(data_type = "MH")
 
-                    p +
-                        geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 1.5) +
-                        geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.2, vjust = 2.1) +
-                        geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 6) +
-                        geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.15, vjust = 4.9)
+                    plot_df <- bind_rows(plot_df_SET, plot_df_MH)
+
+                    # plot data
+                    p <- SET_MH_base_plot(df = plot_df)
+
+                    if(is.null(rate_type)) {
+                        p
+                    } else if(rate_type == "linear") {
+
+                        set_rates <- plot_rate_labels(data = SET_data, level = level, groups = SET_groups, data_type = "SET") %>%
+                            mutate(data_type = "SET")
+
+                        mh_rates <- plot_rate_labels(data = MH_data, level = level, groups = MH_groups, data_type = "MH") %>%
+                            mutate(data_type = "MH")
+
+                        p +
+                            geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 1.5) +
+                            geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.2, vjust = 2.1) +
+                            geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = rate_label), hjust = -0.1, vjust = 6) +
+                            geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.15, vjust = 4.9)
+                    }
                 }
             }
         }

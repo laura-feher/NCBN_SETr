@@ -19,13 +19,14 @@
 #'   SET data must have 1 row per pin reading and the following columns, named
 #'   exactly: event_date_UTC, network_code, park_code, site_name, station_code,
 #'   SET_direction, pin_position, SET_offset_mm, pin_length_mm, and
-#'   pin_height_mm. Note that SET_offset_mm and pin_length_mm can be NA (aka
-#'   blanks) but the columns must be included in the data frame.
+#'   pin_height_mm. Note that SET_offset_mm and pin_length_mm can be empty (aka
+#'   blank) but the columns must be included in the data frame. See
+#'   `example_sets`.
 #'
 #'   MH data must have 1 row per core measurement and the following columns,
 #'   named exactly: event_date_UTC, network_code, park_code, site_name,
 #'   marker_horizon_name, core_measurement_number, core_measurement_depth_mm,
-#'   and established_date.
+#'   and established_date. See `example_mh`.
 #'
 #' @section Details:
 #'
@@ -47,12 +48,12 @@
 #'   the site-level.
 #'
 #' @return For SET data, returns a data frame of station- or site-level
-#'  cumulative surface elevation change. For MH data, returns a data frame of
-#'  station- or site-level vertical accretion.
+#'   cumulative surface elevation change. For MH data, returns a data frame of
+#'   station- or site-level vertical accretion.
 #'
 #' @export
 #'
-#' @import dplyr
+#' @importFrom tidyr fill
 #'
 #' @examples
 #' # Defaults to station-level cumulative change
@@ -83,22 +84,23 @@ calc_change_cumu <- function(data, level = "station") {
     data_type <- detect_data_type(data)
 
     ## do calculations based on data type
-    if(data_type != "SET" & data_type != "MH") {
-        stop(paste0("data must be either SET or MH data and contain the correct columns"))
 
-    } else if(data_type == "SET") {
+    if(data_type == "SET") {
 
         change_cumu_set <- data %>%
+            # apply proper station groupings for NCBN data
             mutate(site_name = correct_site_groups(station_code = station_code, site_name = site_name)) %>%
 
-            # first get cumulative change for each pin
+            # convert to standardized pin heights to account for 6" extensions used at some of these networks' sites
             group_by(network_code, park_code, site_name, station_code, SET_direction, pin_position, .add = TRUE) %>%
             filter(!is.na(pin_height_mm)) %>%
-            # convert to standardized pin heights to account for 6" extensions used at some of these networks' sites
             mutate(pin_height_mm = if_else(network_code %in% c("NCBN", "NCRN", "NETN") & !is.na(SET_offset_mm) & !is.na(pin_length_mm),
                                            1000 + (SET_offset_mm-(pin_length_mm - pin_height_mm)),
                                            pin_height_mm)) %>%
-            mutate(first_pin_height = pin_height_mm[event_date_UTC == min(event_date_UTC[!is.na(pin_height_mm)])],
+
+            # first get cumulative change for each pin
+            mutate(event_date_UTC = as.Date(event_date_UTC),
+                   first_pin_height = pin_height_mm[event_date_UTC == min(event_date_UTC[!is.na(pin_height_mm)])],
                    cumu = pin_height_mm - first_pin_height) %>%
 
             # average cumulative pin change up to the arm-level
@@ -142,9 +144,12 @@ calc_change_cumu <- function(data, level = "station") {
     } else if(data_type == "MH"){
 
         change_cumu_mh <- data %>%
+            # apply proper station groupings for NCBN data
             mutate(site_name = correct_site_groups(station_code = station_code, site_name = site_name)) %>%
 
             # first average all core measurements from each date
+            mutate(event_date_UTC = as.Date(event_date_UTC),
+                   established_date = as.Date(established_date)) %>%
             group_by(network_code, park_code, site_name, station_code, marker_horizon_name, event_date_UTC, established_date, .add = TRUE) %>%
             summarise(cumu = mean(core_measurement_depth_mm, na.rm = TRUE)) %>%
 

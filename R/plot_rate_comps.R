@@ -67,17 +67,17 @@
 #' @examples
 #'
 #' # Default plot gives station-level rates
-#' plot_set_rate_comps(data = example_sets)
+#' plot_rate_comps(data = example_sets)
 #'
 #' # Example with a user-supplied data frame of station-level rates
 #' example_rates <- data.frame("station" = c("station_1", "station_2", "station_3"),
 #'                             "rate" = c(3.2, 4.0, 5.4),
 #'                             "se_rate" = c(1, 0.5, 0.25))
 #'
-#' plot_set_rate_comps(rates = example_rates)
+#' plot_rate_comps(rates = example_rates)
 #'
 #' # Site-level rates
-#' plot_set_rate_comps(data = example_sets, level = "site")
+#' plot_rate_comps(data = example_sets, level = "site")
 #'
 plot_rate_comps <- function(data = NULL, rates = NULL, level = "station"){
 
@@ -98,66 +98,91 @@ plot_rate_comps <- function(data = NULL, rates = NULL, level = "station"){
                 rates_data <- rates
             }
 
+            raw_data_type <- "unknown"
+
         } else if(is.null(rates)) {
 
             # make sure the data is valid SET or MH data
             raw_data_type <- detect_data_type(data)
 
             if(raw_data_type != "SET" & raw_data_type != "MH") {
-                stop(paste0("data must be SET or MH data"))
+                stop(paste0("Data must be valid SET or MH data. See 'data requirements'."))
             } else {
                 rates_data <- calc_linear_rates(data, level = "station") # if supplying a raw data df, use calc_linear_rates to get rates
             }
         }
 
-         # assemble plot
-         ggplot(data = rates_data, aes(x = rate, y = station_code)) +
-             geom_vline(aes(xintercept = 0), color = "gray70", linetype = "dashed") +
-             geom_errorbar(aes(y = station_code, xmin = rate - rate_se, xmax = rate + rate_se), color = "gray55", linewidth = 1) +
-             geom_point(size = 3, color = "red3") +
-             {if(raw_data_type == "SET")
-                 labs(title = "Rates of surface elevation change ± 1 standard error (mm/yr)", x = "Rate of surface elevation change (mm/yr)", y = "Station")
-                 else if(raw_data_type == "MH")
-                     labs(title = "Rates of vertical accretion change ± 1 standard error (mm/yr)", x = "Rate of vertical accretion (mm/yr)", y = "Station")}
+        # assemble plot
+        groups <- rates_data %>%
+            attr(., "groups") %>%
+            select(-c(network_code, park_code, site_name, ".rows")) %>%
+            colnames()
+
+        rates_data <- rates_data %>%
+            tidyr::unite("grouping", all_of(groups), remove = FALSE)
+
+        ggplot(data = rates_data, aes(x = rate, y = grouping)) +
+            geom_vline(aes(xintercept = 0), color = "gray70", linetype = "dashed") +
+            geom_errorbar(aes(y = grouping, xmin = rate - rate_se, xmax = rate + rate_se), color = "gray55", linewidth = 1) +
+            geom_point(size = 3, color = "red3") +
+            {if(raw_data_type == "SET")
+                labs(title = "Rates of surface elevation change ± 1 standard error (mm/yr)", x = "Rate of surface elevation change (mm/yr)", y = "Station")
+                else if(raw_data_type == "MH")
+                    labs(title = "Rates of vertical accretion change ± 1 standard error (mm/yr)", x = "Rate of vertical accretion (mm/yr)", y = "Station")
+                else if(raw_data_type == "unknown")
+                    labs(title = "Rates of change ± 1 standard error (mm/yr)", x = "Rate of change (mm/yr)", y = "Station")}
 
     } else if(level == "site") {
 
-         # if supplying df of rates, make sure that the specified columns exist
-         if(!is.null(rates)) {
-             if(!"site_name" %in% colnames(rates) | !"rate" %in% colnames(rates) | !"rate_se" %in% colnames(rates)) {
-                 stop(paste0("columns 'site_name', 'rate', and/or 'rate_se' were not found in '",
-                             deparse(substitute(rates)), "'"))
-             } else if(!is.numeric(rates$rate)) {
-                 rates_data <- rates %>%
-                     mutate(rate = as.numeric(rate))
-             } else if(!is.numeric(rates$rate_se)) {
-                 rates_dates <- rates %>%
-                     mutate(rate_se = as.numeric(rate_se))
-             } else {
-                 rates_data <- rates
-             }
+        # if supplying df of rates, make sure that the specified columns exist
+        if(!is.null(rates)) {
+            if(!"site_name" %in% colnames(rates) | !"rate" %in% colnames(rates) | !"rate_se" %in% colnames(rates)) {
+                stop(paste0("columns 'site_name', 'rate', and/or 'rate_se' were not found in '",
+                            deparse(substitute(rates)), "'"))
+            } else if(!is.numeric(rates$rate)) {
+                rates_data <- rates %>%
+                    mutate(rate = as.numeric(rate))
+            } else if(!is.numeric(rates$rate_se)) {
+                rates_dates <- rates %>%
+                    mutate(rate_se = as.numeric(rate_se))
+            } else {
+                rates_data <- rates
+            }
 
-         } else if(is.null(rates)) {
+            raw_data_type <- "unknown"
 
-             # make sure the data is valid SET or MH data
-             raw_data_type <- detect_data_type(data)
+        } else if(is.null(rates)) {
 
-             if(raw_data_type != "SET" & raw_data_type != "MH") {
-                 stop(paste0("data must be SET or MH data"))
-             } else {
-                 rates_data <- calc_linear_rates(data, level = "site") # if supplying a raw data df, use calc_linear_rates to get rates
-             }
-         }
+            # make sure the data is valid SET or MH data
+            raw_data_type <- detect_data_type(data)
 
-         # assemble plot
-         ggplot(data = rates_data, aes(x = rate, y = site_name)) +
-             geom_vline(aes(xintercept = 0), color = "gray70", linetype = "dashed") +
-             geom_errorbar(aes(y = site_name, xmin = rate - rate_se, xmax = rate + rate_se), color = "gray55", linewidth = 1) +
-             geom_point(size = 3, color = "red3") +
-             {if(raw_data_type == "SET")
-                 labs(title = "Rates of surface elevation change ± 1 standard error (mm/yr)", x = "Rate of surface elevation change (mm/yr)", y = "Site")
-                 else if(raw_data_type == "MH")
-                     labs(title = "Rates of vertical accretion ± 1 standard error (mm/yr)", x = "Rate of vertical accretion (mm/yr)", y = "Site")}
+            if(raw_data_type != "SET" & raw_data_type != "MH") {
+                stop(paste0("Data must be SET or MH data. See 'data requirements'."))
+            } else {
+                rates_data <- calc_linear_rates(data, level = "site") # if supplying a raw data df, use calc_linear_rates to get rates
+            }
+        }
+
+        # assemble plot
+
+        groups <- rates_data %>%
+            attr(., "groups") %>%
+            select(-c(network_code, park_code, ".rows")) %>%
+            colnames()
+
+        rates_data <- rates_data %>%
+            tidyr::unite("grouping", all_of(groups), remove = FALSE)
+
+        ggplot(data = rates_data, aes(x = rate, y = grouping)) +
+            geom_vline(aes(xintercept = 0), color = "gray70", linetype = "dashed") +
+            geom_errorbar(aes(y = grouping, xmin = rate - rate_se, xmax = rate + rate_se), color = "gray55", linewidth = 1) +
+            geom_point(size = 3, color = "red3") +
+            {if(raw_data_type == "SET")
+                labs(title = "Rates of surface elevation change ± 1 standard error (mm/yr)", x = "Rate of surface elevation change (mm/yr)", y = "Site")
+                else if(raw_data_type == "MH")
+                    labs(title = "Rates of vertical accretion ± 1 standard error (mm/yr)", x = "Rate of vertical accretion (mm/yr)", y = "Site")
+                else if(raw_data_type == "unknown")
+                    labs(title = "Rates of change ± 1 standard error (mm/yr)", x = "Rate of change (mm/yr)", y = "Site")}
 
     }
 }

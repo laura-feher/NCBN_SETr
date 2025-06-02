@@ -11,8 +11,8 @@ Author:
            role = c("aut"),
            email = "kim@catbirdstats.com")
 Maintainer: Laura Feher <laura_feher@nps.gov>
-Description: Simplifies calculations and makes graphs for 
-    QA/QC and communication of NCBN SET data.
+Description: Simplifies calculations and makes graphs for communication of NCBN 
+    SET data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -25,6 +25,12 @@ Imports:
     ggplot2,
     rlang,
     stats,
-    DBI
+    DBI,
+    ggh4x,
+    odbc,
+    purrr,
+    readr,
+    readxl,
+    tidyr
 Suggests: 
     testthat (>= 2.1.0)

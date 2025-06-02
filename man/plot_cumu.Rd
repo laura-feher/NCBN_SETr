@@ -73,13 +73,14 @@ rates of change.
   SET data must have 1 row per pin reading and the following columns, named
   exactly: event_date_UTC, network_code, park_code, site_name, station_code,
   SET_direction, pin_position, SET_offset_mm, pin_length_mm, and
-  pin_height_mm. Note that SET_offset_mm and pin_length_mm can be NA (aka
-  blanks) but the columns must be included in the data frame.
+  pin_height_mm. Note that SET_offset_mm and pin_length_mm can be empty (aka
+  blank) but the columns must be included in the data frame. See
+  `example_sets`.
 
   MH data must have 1 row per core measurement and the following columns,
   named exactly: event_date_UTC, network_code, park_code, site_name,
   marker_horizon_name, core_measurement_number, core_measurement_depth_mm,
-  and established_date.
+  and established_date. See `example_mh`.
 }
 
 \section{Details}{
