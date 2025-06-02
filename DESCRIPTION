@@ -1,7 +1,7 @@
 Package: SETrNCBN
 Title: Functions for working with NCBN Surface Elevation Table (SET) data
 Version: 0.0.0.9001
-Authors@R: 
+Author: 
     person(given = "Laura",
            family = "Feher",
            role = c("aut", "cre"),
@@ -11,8 +11,8 @@ Authors@R:
            role = c("aut"),
            email = "kim@catbirdstats.com")
 Maintainer: Laura Feher <laura_feher@nps.gov>
-Description: Simplifies calculations and makes graphs for 
-    QA/QC and communication of NCBN SET data.
+Description: Simplifies calculations and makes graphs for communication of NCBN 
+    SET data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -25,6 +25,12 @@ Imports:
     ggplot2,
     rlang,
     stats,
-    DBI
+    DBI,
+    ggh4x,
+    odbc,
+    purrr,
+    readr,
+    readxl,
+    tidyr
 Suggests: 
     testthat (>= 2.1.0)

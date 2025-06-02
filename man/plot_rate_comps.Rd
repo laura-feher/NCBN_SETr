@@ -79,16 +79,16 @@ This function creates a 'TIE fighter' style plot that can be
 \examples{
 
 # Default plot gives station-level rates
-plot_set_rate_comps(data = example_sets)
+plot_rate_comps(data = example_sets)
 
 # Example with a user-supplied data frame of station-level rates
 example_rates <- data.frame("station" = c("station_1", "station_2", "station_3"),
                             "rate" = c(3.2, 4.0, 5.4),
                             "se_rate" = c(1, 0.5, 0.25))
 
-plot_set_rate_comps(rates = example_rates)
+plot_rate_comps(rates = example_rates)
 
 # Site-level rates
-plot_set_rate_comps(data = example_sets, level = "site")
+plot_rate_comps(data = example_sets, level = "site")
 
 }

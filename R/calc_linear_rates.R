@@ -53,7 +53,7 @@ calc_linear_rates <- function(data, level = "station"){
     data_type <- detect_data_type(data)
 
     if(data_type != "SET" & data_type != "MH") {
-        stop(paste0("data must be either SET or MH data"))
+        stop(paste0("Data must be either valid SET or MH data. See 'data requirements' in the documentation for `calc_change_cumu()`."))
     } else if (data_type == "SET") {
 
         # use linear regression to get a rate of change for each station
@@ -91,10 +91,10 @@ calc_linear_rates <- function(data, level = "station"){
             ) %>%
             {if (level == "station")
                 mutate(.,
-                       rate_type = "station")
+                       rate_level = "station")
                 else if (level == "site")
                     mutate(.,
-                           rate_type = "site")}
+                           rate_level = "site")}
 
         return(linear_rates_set)
 
@@ -134,10 +134,10 @@ calc_linear_rates <- function(data, level = "station"){
             ) %>%
             {if (level == "station")
                 mutate(.,
-                       rate_type = "station")
+                       rate_level = "station")
                 else if (level == "site")
                     mutate(.,
-                           rate_type = "site")}
+                           rate_level = "site")}
 
         return(linear_rates_mh)
     }

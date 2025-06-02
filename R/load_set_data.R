@@ -102,7 +102,7 @@ load_set_data <- function(park = NULL, network_code = NULL, file_path = NULL, db
 
         ## conditions: have correct columns in data frame
         ## stop and give an informative message if this isn't met
-        req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm")
+        req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm", "SET_offset_mm", "pin_length_mm")
 
         if(sum(req_clms %in% names(data)) != length(req_clms)){
             stop(paste("Your data frame must have the following columns, with these names, but is missing at least one:", paste(req_clms, collapse = ", ")))
@@ -116,7 +116,7 @@ load_set_data <- function(park = NULL, network_code = NULL, file_path = NULL, db
 
         ## conditions: have correct columns in data frame
         ## stop and give an informative message if this isn't met
-        req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm")
+        req_clms <- c("event_date_UTC", "network_code", "park_code", "site_name", "station_code", "SET_direction", "pin_position", "pin_height_mm", "SET_offset_mm", "pin_length_mm")
 
         if(sum(req_clms %in% names(data)) != length(req_clms)){
             stop(paste("Your data frame must have the following columns, with these names, but is missing at least one:", paste(req_clms, collapse = ", ")))

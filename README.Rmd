@@ -36,7 +36,7 @@ devtools::install_github("laura-feher/SETrNCBN")
 
 ## Load SET or MH data
 
-Data can be pulled from the SET database using `r load_set_data()` for SET data or `r load_mh_data()` for SET and MH data, respectively. Use the park or network code options to limit the data to a specific park(s) or I&M network(s).
+Data can be pulled from the SET database using load_set_data() for SET data or load_mh_data() for SET and MH data, respectively. Use the park or network code options to limit the data to a specific park(s) or I&M network(s).
 
 ```{r message = FALSE, warning = FALSE}
 library(SETrNCBN)
@@ -61,7 +61,7 @@ head(set_df)
 
 ## Calculate Station-Level Cumulative Change
 
-The function `r calc_change_cumu` can be used to calculate station-level cumulative surface elevation change from SET data or vertical accretion from MH data. The resulting data frame has the mean station-level cumulative change for each sampling date.
+The function calc_change_cumu() can be used to calculate station-level cumulative surface elevation change from SET data or vertical accretion from MH data. The resulting data frame has the mean station-level cumulative change for each sampling date.
 
 ```{r message=FALSE, warning=FALSE}
 calc_change_cumu(example_sets)
@@ -69,60 +69,57 @@ calc_change_cumu(example_sets)
 
 ## Plot Station-Level Cumulative Change
 
-The function `r plot_station_cumu` can be used to plot station-level cumulative surface elevation change from SET data or vertical accretion from MH data.
+The function plot_station_cumu can be used to plot station-level cumulative surface elevation change from SET data or vertical accretion from MH data.
 
 ```{r message=FALSE, warning=FALSE}
-plot_station_cumu(SET_data = example_sets)
+plot_cumu(SET_data = example_sets)
 ```
 
 ```{r message=FALSE, warning=FALSE}
-plot_station_cumu(MH_data = example_mh)
+plot_cumu(MH_data = example_mh)
 ```
 
 You can also plot SET and MH data for each station together on a single plot:
 
 ```{r message=FALSE, warning=FALSE}
-plot_station_cumu(SET_data = example_sets, MH_data = example_mh, columns = 2)
+library(ggh4x)
+plot_cumu(SET_data = example_sets, MH_data = example_mh, columns = 2)
 ```
 
 ## Calculate Linear Rates of Change
 
-The function `r calc_linear_rates()` can be used to calculate simple linear rates of change at the station-level in mm/yr.
+The function calc_linear_rates() can be used to calculate simple linear rates of change at the station-level in mm/yr.
 
 ```{r message=FALSE, warning=FALSE}
 set_rates <- calc_linear_rates(example_sets)
 
 set_rates %>%
-    ungroup() %>%
-    select(park_code, station_code, station_rate, station_se_rate)
+    dplyr::ungroup() %>%
+    dplyr::select(park_code, station_code, rate, rate_se, rate_type)
 ```
 
 ## Visually Compare Station-Level Rates of Change
 
-The functions `r plot_set_rate_comps()` and `r plot_set_mh_comps()` can be used to create 'tie fighter' plots that are helpful for visually comparing rates between stations:
+The functions plot_set_rate_comps() and plot_set_mh_comps() can be used to create 'tie fighter' plots that are helpful for visually comparing rates between stations:
 
 ```{r message=FALSE, warning=FALSE}
-plot_set_rate_comps(example_sets)
+plot_rate_comps(example_sets)
 ```
 
 Alternatively, if you've already calculated rates of change and want to plot those, you can use 'calc_rates' = FALSE and supply a data frame of rates that has columns for station IDs, station-level rates, and station rate std errors with one row per station:
 
 ```{r message=FALSE, warning=FALSE}
 example_rates <- data.frame(
-    "station" = c("station_1", "station_2", "station_3"),
+    "station_code" = c("station_1", "station_2", "station_3"),
     "rate" = c(3.2, 4.0, 5.4),
-    "se_rate" = c(1, 0.5, 0.25))
+    "rate_se" = c(1, 0.5, 0.25))
 
-plot_set_rate_comps(data = example_rates,
-                    calc_rates = FALSE,
-                    station_ids = "station",
-                    rates = "rate",
-                    station_se = "se_rate")
+plot_rate_comps(rates = example_rates, level = "station")
 ```
 
 ## Get Park-Specific SLR Rates
 
-The function `r get_sea_level_data()` can be used to get rates of sea-level rise from the NOAA tide gauge that is closest to the park. The function returns a list with 2 dataframes: 'slr_data' is the relative sea-level data downloaded from the NOAA tides and currents website; 'slr_rate' provides the calculated rate of sea-level rise, standard error of the SLR rate, lower confidence interval, upper, minimum year of data used for calculating SLR, and maximum year of data used for calculating SLR:
+The function get_sea_level_data() can be used to get rates of sea-level rise from the NOAA tide gauge that is closest to the park. The function returns a list with 2 dataframes: 'slr_data' is the relative sea-level data downloaded from the NOAA tides and currents website; 'slr_rate' provides the calculated rate of sea-level rise, standard error of the SLR rate, lower confidence interval, upper, minimum year of data used for calculating SLR, and maximum year of data used for calculating SLR:
 
 ```{r message=FALSE, warning=FALSE}
 get_sea_level_data("ASIS")
