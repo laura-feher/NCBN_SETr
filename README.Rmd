@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/laura-feher/NCBN_SETr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/laura-feher/NCBN_SETr/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of SETrNCBN is to simplify the calculation of cumulative rates of surface elevation change and vertical accretion from the National Park Services' Surface Elevation Table (SET) data.
