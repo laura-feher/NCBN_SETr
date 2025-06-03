@@ -23,6 +23,7 @@
 #'
 #' A sample of marker horizon data from M11 at ASIS
 #'
+#' @name example_mh
 #' @format A data frame with 664 rows and 9 variables:
 #' \describe{
 #'   \item{event_date_UTC}{Date UTC; measurement date, yyyy-mm-dd format}
