@@ -71,18 +71,7 @@ calc_change_cumu(example_sets)
 # Site-level cumulative change
 calc_change_cumu(example_mh, level = "site")
 
-# Can also be used with pipes to include/exclude specific stations, dates, etc.
-## exclude station M11-3 from calculations of cumulative change
-example_sets \%>\%
-    filter(station_code != "M11-3") \%>\%
-    calc_change_cumu(., level = "site")
-
-## Exclude data from after 2016 from calculations of cumulative change
-example_sets \%>\%
-    filter(event_date_UTC < as.Date("2016-01-01")) \%>\%
-    calc_change_cumu(., level = "station")
-
-## Define custom groups for calculating cumulative change
+# Define custom groups for calculating cumulative change
 example_sets \%>\%
     group_by(set_type) \%>\%
     calc_change_cumu(., level = "site")

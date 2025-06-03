@@ -36,7 +36,8 @@ test_that("plot has expected elements", {
 })
 
 test_that("plot has expected elements", {
-    df <- readr::read_csv(test_path("testdata", "test_raw_MH_data.csv"), col_types = c("ccccccDcidD"))
+    # df <- readr::read_csv(test_path("testdata", "test_raw_MH_data.csv"), col_types = c("ccccccDcidD"))
+    df <- readRDS(test_path("testdata", "test_raw_MH_data.rds"))
     p <- plot_rate_comps(df)
     expect_identical(class(p[["layers"]][[1]][["geom"]])[1], "GeomVline")
     expect_identical(class(p[["layers"]][[2]][["geom"]])[1], "GeomErrorbar")
