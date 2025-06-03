@@ -252,6 +252,8 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
 
             SET_MH_base_plot <- function(df) {
 
+                guide_legend <- function(...) ggplot2::guide_legend(...)
+
                 suppressWarnings(
                     ggplot(df, aes(x = event_date_UTC, y = mean_cumu, group = data_type)) +
                         geom_line(aes(color1 = data_type)) +
