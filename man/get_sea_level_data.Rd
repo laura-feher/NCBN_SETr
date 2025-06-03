@@ -57,6 +57,8 @@ The rate of sea-level rise for each park is calculated using
   https://tidesandcurrents.noaa.gov/.
 }
 \note{
+Right now this only works for parks in NCBN, NCRN, and NETN
+
 Note that monthly mean sea level values are relative to the mean
   sea-level datum for each station.
 }
