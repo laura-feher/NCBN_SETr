@@ -61,8 +61,8 @@
 #' # Station-level cumulative change
 #' plot_cumu(SET_data = example_sets)
 #'
-#' # Combined plot of site-level SET and MH cumulative change plot_cumu(SET_data
-#' = example_sets, MH_data = example_mh, level = "site")
+#' # Combined plot of site-level SET and MH cumulative change
+#' plot_cumu(SET_data = example_sets, MH_data = example_mh, level = "site")
 #'
 #' # Change the number of columns, point size, or scaling of x- and/or y-axis
 #' plot_cumu(SET_data = example_sets, MH_data = example_mh, columns = 2,
@@ -251,8 +251,6 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
         } else {
 
             SET_MH_base_plot <- function(df) {
-
-                guide_legend <- function(...) ggplot2::guide_legend(...)
 
                 suppressWarnings(
                     ggplot(df, aes(x = event_date_UTC, y = mean_cumu, group = data_type)) +

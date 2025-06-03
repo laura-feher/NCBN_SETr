@@ -108,8 +108,8 @@ rates of change.
 # Station-level cumulative change
 plot_cumu(SET_data = example_sets)
 
-# Combined plot of site-level SET and MH cumulative change plot_cumu(SET_data
-= example_sets, MH_data = example_mh, level = "site")
+# Combined plot of site-level SET and MH cumulative change
+plot_cumu(SET_data = example_sets, MH_data = example_mh, level = "site")
 
 # Change the number of columns, point size, or scaling of x- and/or y-axis
 plot_cumu(SET_data = example_sets, MH_data = example_mh, columns = 2,
