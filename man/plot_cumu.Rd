@@ -108,28 +108,29 @@ rates of change.
 # Station-level cumulative change
 plot_cumu(SET_data = example_sets)
 
-# Combined plot of site-level SET and MH cumulative change
-plot_cumu(SET_data = example_sets, MH_data = example_mh, level = "site")
+# Combined plot of site-level SET and MH cumulative change plot_cumu(SET_data
+= example_sets, MH_data = example_mh, level = "site")
 
 # Change the number of columns, point size, or scaling of x- and/or y-axis
-plot_cumu(SET_data = example_sets, MH_data = example_mh, columns = 2, pointsize = 1, scales = "free")
+plot_cumu(SET_data = example_sets, MH_data = example_mh, columns = 2,
+pointsize = 1, scales = "free")
 
-# Apply a date filter to both SET and MH, and then plot
-df_list <- list("SET" = example_sets, "MH" = example_mh) \%>\%
-map(., ~.x \%>\%
-       filter(event_date_UTC < as.Date("2016-01-01")) \%>\%
-       nest()) \%>\%
-       list_cbind()
+# Apply a date filter to both SET and MH, and then plot df_list <- list("SET"
+= example_sets, "MH" = example_mh) \%>\% map(., ~.x \%>\% filter(event_date_UTC <
+as.Date("2016-01-01")) \%>\% nest()) \%>\% list_cbind()
 
-# Modify the 'station_code' or 'site_name' columns to facet plots by custom groups
-plot_cumu(SET_data = unnest(df_list$SET, cols = "data"), MH_data = unnest(df_list$MH, cols = "data"))
+# Modify the 'station_code' or 'site_name' columns to facet plots by custom
+groups plot_cumu(SET_data = unnest(df_list$SET, cols = "data"), MH_data =
+unnest(df_list$MH, cols = "data"))
 
-example_sets_set_type <- example_sets \%>\%
-    mutate(site_name = if_else(station_code == "M11-2", paste0(site_name, " shallow"), paste0(site_name," deep")))
+example_sets_set_type <- example_sets \%>\% mutate(site_name =
+if_else(station_code == "M11-2", paste0(site_name, " shallow"),
+paste0(site_name," deep")))
 
-example_mh_set_type <- example_mh \%>\%
-    mutate(site_name = if_else(station_code == "M11-2", paste0(site_name, " shallow"), paste0(site_name," deep")))
+example_mh_set_type <- example_mh \%>\% mutate(site_name = if_else(station_code
+== "M11-2", paste0(site_name, " shallow"), paste0(site_name," deep")))
 
-plot_cumu(SET_data = example_sets_set_type, MH_data = example_mh_set_type, level = "site", rate_type = "linear")
+plot_cumu(SET_data = example_sets_set_type, MH_data = example_mh_set_type,
+level = "site", rate_type = "linear")
 
 }

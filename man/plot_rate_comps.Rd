@@ -17,11 +17,6 @@ rates of surface elevation change. See details below for requirements.}
 surface elevation change. One of:
 * `"station"`: (default) station-level rates of surface elevation change.
 * `"site"`: site-level rates of surface elevation change.}
-
-\item{data_type}{A string (required). Is the data supplied to `data` or
-`rates` SET or MH data? One of:
-* `"SET"`: SET data.
-* `"MH"`: MH data.}
 }
 \value{
 a ggplot object
@@ -42,15 +37,15 @@ This function creates a 'TIE fighter' style plot that can be
   user-created data frame of station- or site-level rates of surface
   elevation change (`rates`).
 
-  If supplying `data` and `data_type = "SET"`, raw SET data must have 1 row
-  per pin reading and the following columns, named exactly: event_date_UTC,
+  If supplying SET data for `data`, raw SET data must have 1 row per pin
+  reading and the following columns, named exactly: event_date_UTC,
   network_code, park_code, site_name, station_code, SET_direction,
   pin_position, SET_offset_mm, pin_length_mm, and pin_height_mm. Note that
   SET_offset_mm and pin_length_mm can be NA (aka blanks) but the columns must
   be included in the data frame.
 
-  If supplying `data` and `data_type = "MH"`, raw MH data must have 1 row per
-  core measurement and the following columns, named exactly: event_date_UTC,
+  If supplying MH data for `data`, raw MH data must have 1 row per core
+  measurement and the following columns, named exactly: event_date_UTC,
   network_code, park_code, site_name, station_code, marker_horizon_name,
   core_measurement_number, core_measurement_depth_mm, and established_date
 

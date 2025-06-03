@@ -23,15 +23,15 @@ Imports:
     dplyr,
     magrittr,
     ggplot2,
-    rlang,
-    stats,
     DBI,
     ggh4x,
     odbc,
     purrr,
     readr,
     readxl,
-    tidyr
+    tidyr,
+    tibble,
+    stringr
 Suggests: 
     testthat (>= 2.1.0)
 URL: https://github.com/laura-feher/NCBN_SETr
