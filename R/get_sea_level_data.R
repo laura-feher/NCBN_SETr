@@ -41,6 +41,8 @@
 #'   "min_year"), and maximum year of data used for calculating SLR (column
 #'   "max_year").
 #'
+#' @note Right now this only works for parks in NCBN, NCRN, and NETN
+#'
 #' @note Note that monthly mean sea level values are relative to the mean
 #'   sea-level datum for each station.
 #'
