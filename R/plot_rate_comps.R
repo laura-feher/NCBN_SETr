@@ -1,14 +1,13 @@
-#' Graphical comparison of station- or site-level surface elevation change rates
+#' Plot comparison of station- or site-level surface elevation change or vertical accretion rates
 #'
-#' @description This function creates a 'TIE fighter' style plot that can be
-#'   used to visually compare station- or site-level linear rates of surface
-#'   elevation change.
+#' This function creates a 'TIE fighter' style plot that can be used to visually
+#' compare station- or site-level linear rates of surface elevation change or vertical accretion.
 #'
-#'   Can use a data frame of either raw SET data (`data` argument) or a data
-#'   frame of pre-calculated station- or site-level rates of surface elevation
-#'   change (`rates` argument).
+#' Accepts either a data frame of either raw SET or MH data (`data` argument) or a
+#' data frame of pre-calculated station- or site-level rates of surface
+#' elevation change or vertical accretion (`rates` argument).
 #'
-#' @param data A data frame (optional). A data frame of raw SET data. See
+#' @param data A data frame (optional). A data frame of raw SET or MH data. See
 #'   details below for requirements.
 #'
 #' @param rates A data frame (optional). A data frame of station- or site-level
@@ -19,23 +18,15 @@
 #'   * `"station"`: (default) station-level rates of surface elevation change.
 #'   * `"site"`: site-level rates of surface elevation change.
 #'
-#' @section Data Requirements:
+#' @inheritSection calc_change_cumu Data Requirements
+#'
+#' @inheritSection calc_change_cumu Details
+#'
+#' @section Data Requirements for pre-calculated rates of change:
 #'
 #'   This function takes a data frame of either raw SET data (`data`) or a
 #'   user-created data frame of station- or site-level rates of surface
 #'   elevation change (`rates`).
-#'
-#'   If supplying SET data for `data`, raw SET data must have 1 row per pin
-#'   reading and the following columns, named exactly: event_date_UTC,
-#'   network_code, park_code, site_name, station_code, SET_direction,
-#'   pin_position, SET_offset_mm, pin_length_mm, and pin_height_mm. Note that
-#'   SET_offset_mm and pin_length_mm can be NA (aka blanks) but the columns must
-#'   be included in the data frame.
-#'
-#'   If supplying MH data for `data`, raw MH data must have 1 row per core
-#'   measurement and the following columns, named exactly: event_date_UTC,
-#'   network_code, park_code, site_name, station_code, marker_horizon_name,
-#'   core_measurement_number, core_measurement_depth_mm, and established_date
 #'
 #'   If supplying a user created data frame to  `rates` and `level = station`,
 #'   must be a data frame of station-level rates of surface elevation change or
@@ -52,7 +43,10 @@
 #'
 #' @inheritSection plot_cumu Note
 #'
-#' @return a ggplot object
+#' @return a ggplot object: depending on the type of data supplied, x-axis
+#'   values are rates of either (a) cumulative surface elevation change or (b)
+#'   vertical accretion. If `level = "station"` (default), the y-axis is station
+#'   codes. If `level = "site"`, the y-axis is site names.
 #'
 #' @export
 #'
@@ -76,17 +70,17 @@
 #'
 plot_rate_comps <- function(data = NULL, rates = NULL, level = "station"){
 
-    if(level == "station") {
+    if (level == "station") {
 
         # if supplying df of rates, make sure that the specified columns exist
-        if(!is.null(rates)) {
-            if(!"station_code" %in% colnames(rates) | !"rate" %in% colnames(rates) | !"rate_se" %in% colnames(rates)) {
+        if (!is.null(rates)) {
+            if (!"station_code" %in% colnames(rates) | !"rate" %in% colnames(rates) | !"rate_se" %in% colnames(rates)) {
                 stop(paste0("columns 'station_code', 'rate', and/or 'rate_se' were not found in '",
                             deparse(substitute(rates)), "'"))
-            } else if(!is.numeric(rates$rate)) {
+            } else if (!is.numeric(rates$rate)) {
                 rates_data <- rates %>%
                     mutate(rate = as.numeric(rate))
-            } else if(!is.numeric(rates$rate_se)) {
+            } else if (!is.numeric(rates$rate_se)) {
                 rates_data <- rates %>%
                     mutate(rate_se = as.numeric(rate_se))
             } else {
@@ -95,12 +89,12 @@ plot_rate_comps <- function(data = NULL, rates = NULL, level = "station"){
 
             raw_data_type <- "unknown"
 
-        } else if(is.null(rates)) {
+        } else if (is.null(rates)) {
 
             # make sure the data is valid SET or MH data
             raw_data_type <- detect_data_type(data)
 
-            if(raw_data_type != "SET" & raw_data_type != "MH") {
+            if (raw_data_type != "SET" & raw_data_type != "MH") {
                 stop(paste0("Data must be valid SET or MH data. See 'data requirements'."))
             } else {
                 rates_data <- calc_linear_rates(data, level = "station") # if supplying a raw data df, use calc_linear_rates to get rates
@@ -127,17 +121,17 @@ plot_rate_comps <- function(data = NULL, rates = NULL, level = "station"){
                 else if(raw_data_type == "unknown")
                     labs(title = "Rates of change ± 1 standard error (mm/yr)", x = "Rate of change (mm/yr)", y = "Station")}
 
-    } else if(level == "site") {
+    } else if (level == "site") {
 
         # if supplying df of rates, make sure that the specified columns exist
-        if(!is.null(rates)) {
-            if(!"site_name" %in% colnames(rates) | !"rate" %in% colnames(rates) | !"rate_se" %in% colnames(rates)) {
+        if (!is.null(rates)) {
+            if (!"site_name" %in% colnames(rates) | !"rate" %in% colnames(rates) | !"rate_se" %in% colnames(rates)) {
                 stop(paste0("columns 'site_name', 'rate', and/or 'rate_se' were not found in '",
                             deparse(substitute(rates)), "'"))
-            } else if(!is.numeric(rates$rate)) {
+            } else if (!is.numeric(rates$rate)) {
                 rates_data <- rates %>%
                     mutate(rate = as.numeric(rate))
-            } else if(!is.numeric(rates$rate_se)) {
+            } else if (!is.numeric(rates$rate_se)) {
                 rates_dates <- rates %>%
                     mutate(rate_se = as.numeric(rate_se))
             } else {
@@ -146,12 +140,12 @@ plot_rate_comps <- function(data = NULL, rates = NULL, level = "station"){
 
             raw_data_type <- "unknown"
 
-        } else if(is.null(rates)) {
+        } else if (is.null(rates)) {
 
             # make sure the data is valid SET or MH data
             raw_data_type <- detect_data_type(data)
 
-            if(raw_data_type != "SET" & raw_data_type != "MH") {
+            if (raw_data_type != "SET" & raw_data_type != "MH") {
                 stop(paste0("Data must be SET or MH data. See 'data requirements'."))
             } else {
                 rates_data <- calc_linear_rates(data, level = "site") # if supplying a raw data df, use calc_linear_rates to get rates
@@ -172,11 +166,11 @@ plot_rate_comps <- function(data = NULL, rates = NULL, level = "station"){
             geom_vline(aes(xintercept = 0), color = "gray70", linetype = "dashed") +
             geom_errorbar(aes(y = grouping, xmin = rate - rate_se, xmax = rate + rate_se), color = "gray55", linewidth = 1) +
             geom_point(size = 3, color = "red3") +
-            {if(raw_data_type == "SET")
+            {if (raw_data_type == "SET")
                 labs(title = "Rates of surface elevation change ± 1 standard error (mm/yr)", x = "Rate of surface elevation change (mm/yr)", y = "Site")
-                else if(raw_data_type == "MH")
+                else if (raw_data_type == "MH")
                     labs(title = "Rates of vertical accretion ± 1 standard error (mm/yr)", x = "Rate of vertical accretion (mm/yr)", y = "Site")
-                else if(raw_data_type == "unknown")
+                else if (raw_data_type == "unknown")
                     labs(title = "Rates of change ± 1 standard error (mm/yr)", x = "Rate of change (mm/yr)", y = "Site")}
 
     }

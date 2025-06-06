@@ -4,10 +4,10 @@
 #' cumulative surface elevation change (for SET data) or vertical accretion (for
 #' MH data) on each measurement date at either the station- or site-level.
 #'
-#' @param data A data frame. A data frame of raw SET or MH data. See details
+#' @param data data frame. A data frame of raw SET or MH data. See details
 #'   below for requirements.
 #'
-#' @param level A string (optional). Level at which to calculate rates of
+#' @param level string (optional). Level at which to calculate rates of
 #'   surface elevation change or vertical accretion. One of:
 #'   * `"station"`: (default) station-level rates of surface elevation change.
 #'   * `"site"`: site-level rates of surface elevation change.
@@ -74,7 +74,7 @@ calc_change_cumu <- function(data, level = "station") {
 
     ## do calculations based on data type
 
-    if(data_type == "SET") {
+    if (data_type == "SET") {
 
         change_cumu_set <- data %>%
             # apply proper station groupings for NCBN data
@@ -108,7 +108,7 @@ calc_change_cumu <- function(data, level = "station") {
 
             {if (level == "station")
                 .
-                else if(level == "site")
+                else if (level == "site")
                     # average cumulative station-level change up to the site-level
                     group_by(., network_code, park_code, site_name, .add = TRUE) %>%
                     drop_groups2(., event_date_UTC) %>%
@@ -130,7 +130,7 @@ calc_change_cumu <- function(data, level = "station") {
 
         return(change_cumu_set)
 
-    } else if(data_type == "MH"){
+    } else if (data_type == "MH"){
 
         change_cumu_mh <- data %>%
             # apply proper station groupings for NCBN data
@@ -182,9 +182,9 @@ calc_change_cumu <- function(data, level = "station") {
             mutate(mean_cumu = if_else(established_date != group_min_first_date, mean_cumu + previous_plot_group_cumu, mean_cumu),
                    data_type = "MH") %>%
 
-            {if(level == "station")
+            {if (level == "station")
                 .
-                else if(level == "site")
+                else if (level == "site")
                     # average the station-level measurements up to the site-level
                     group_by(., network_code, park_code, site_name, .add = TRUE) %>%
                     drop_groups2(., event_date_UTC) %>%

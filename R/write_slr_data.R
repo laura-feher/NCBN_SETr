@@ -1,7 +1,8 @@
-#' Save SLR data to a csv file
+#' Save SLR data and rates to a csv file
 #'
-#' This function saves a data frame of sea-level rise data produced by
-#' `get_sea_level_data` to csv files.
+#' This function saves a data frame produced by `get_sea_level_data`. Creates
+#' one csv file containing the sea-level data and another csv file containing
+#' the calculated rate of sea-level rise.
 #'
 #' @param data list. Specifically a list of 2 data frames produced by
 #'   `get_sea_level_data`.
@@ -15,9 +16,9 @@
 #' @param overwrite boolean (TRUE/FALSE). If a file with the same name already
 #'   exists in `dest_folder`, do you want to overwrite it? Defaults to FALSE.
 #'
-#' @returns Saves the SLR data and calculated SLR rate to csv files. The file
-#'   names will be the name of the data frame supplied to `data` suffixed with
-#'   "_slr_data" or "_slr_rate" and the current date e.g.
+#' @returns Saves the SLR data and calculated SLR rate to two separate csv
+#'   files. The file names will be the name of the data frame supplied to `data`
+#'   suffixed with "_slr_data" or "_slr_rate" and the current date e.g.
 #'   "asis_slr_data_2025-06-05.csv" and "asis_slr_rate_2025-06-05.csv".
 #'
 #' @export

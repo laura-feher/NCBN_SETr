@@ -1,4 +1,4 @@
-#' Save data to a csv file
+#' Save raw SET/MH data, cumulative change, or linear rates of change to a csv file
 #'
 #' This function saves a data frame to a csv file. Can be a data frame of
 #' raw SET/MH data produced by `load_set_data` or `load_mh_data`, a data frame

@@ -2,7 +2,7 @@
 % Please edit documentation in R/write_set_mh_data.R
 \name{write_set_mh_data}
 \alias{write_set_mh_data}
-\title{Save data to a csv file}
+\title{Save raw SET/MH data, cumulative change, or linear rates of change to a csv file}
 \usage{
 write_set_mh_data(
   data,

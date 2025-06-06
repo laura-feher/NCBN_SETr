@@ -5,31 +5,35 @@
 #' accretion at each station or site. Optionally calculates and displays linear
 #' rates of change.
 #'
-#' @param SET_data A data frame. A data frame of raw SET data. See details below
-#'   for requirements. If both SET and MH data are supplied, plots both.
+#' @param SET_data data frame (must supply either `SET_data` or `MH_data`). A
+#'   data frame of raw SET data. See details below for requirements. If both SET
+#'   and MH data are supplied, plots both.
 #'
-#' @param MH_data A data frame. A data frame of raw MH data. See details below
-#'   for requirements. If both SET and MH data are supplied, plots both.
+#' @param MH_data data frame (must supply either `SET_data` or `MH_data`). A
+#'   data frame of raw MH data. See details below for requirements. If both SET
+#'   and MH data are supplied, plots both.
 #'
-#' @param level A string (optional). Level at which to calculate rates of
-#'   surface elevation change and/or vertical accretion. One of:
+#' @param level string (optional). Level at which to calculate rates of surface
+#'   elevation change and/or vertical accretion. One of:
 #'   * `"station"` (default) station-level rates of surface elevation change.
 #'   * `"site"` site-level rates of surface elevation change.
 #'
-#' @param rate_type A string (optional); Calculate linear rate of change and
+#' @param rate_type string (optional); Calculate linear rate of change and
 #'   include in the plot? Use rate_type = `"linear"` to display station- (level
 #'   = `"station"`) or site-level (level = `"site"`) rates of surface elevation
 #'   change or vertical accretion in mm/yr.
 #'
-#' @param columns An integer. Number of columns you want in the faceted output;
-#'   defaults to 4. Utilizes the `ncol` argument of [ggplot2::facet_wrap].
+#' @param columns integer (optional). Number of columns you want in the faceted
+#'   output; defaults to 4. Utilizes the `ncol` argument of
+#'   [ggplot2::facet_wrap].
 #'
-#' @param pointsize A number. Size of points on the plot; defaults to 3.5.
-#'   Utilizes the `size` argument of [ggplot2::geom_point].
+#' @param pointsize number (optional). Size of points on the plot; defaults to
+#'   3.5. Utilizes the `size` argument of [ggplot2::geom_point].
 #'
-#' @param scales Do you want axis scales to be the same in all facets ("fixed")
-#'   or to vary between facets? Defaults to using the same scale between all
-#'   panels. Utilizes the `scales` parameter of [ggplot2::facet_wrap]. One of:
+#' @param scales string (optional). Do you want axis scales to be the same in
+#'   all facets ("fixed") or to vary between facets? Defaults to using the same
+#'   scale between all panels. Utilizes the `scales` parameter of
+#'   [ggplot2::facet_wrap]. One of:
 #'   * `"fixed"`: default; use the same axis scales in all panels.
 #'   * `"free_x"`: allow x-axis scales to vary between panels.
 #'   * `"free_y"`: allow y-axis scales to vary between panels.
@@ -43,12 +47,13 @@
 #'
 #'   Cumulative change is calculated via the function [calc_change_cumu] and
 #'   linear rates of change are calculated via the function [calc_linear_rates].
-#'   See function documentation for details.
+#' See function documentation for details.
 #'
 #' @return A ggplot object: x-axis is date; depending on the type of data
 #'   supplied, y-axis is either (a) cumulative surface elevation change and/or
-#'   (b) vertical accretion. level = "station" returns a plot with one panel per
-#'   station, whereas level = "site" returns a plot with one panel per site.
+#'   (b) vertical accretion. `level = "station"` (default) returns a plot with
+#'   one panel per station, whereas `level = "site"` returns a plot with one
+#'   panel per site.
 #'
 #' @export
 #'
@@ -78,18 +83,24 @@
 #' plot_cumu(SET_data = unnest(df_list$SET, cols = "data"), MH_data =
 #' unnest(df_list$MH, cols = "data"))
 #'
+#' # Use ggplot2-style "layers" to modify the plot to your liking
+#' plot_cumu(SET_data = example_sets) +
+#'     theme(
+#'         axis.text = element_text(color = "red")
+#'         )
+#'
 plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_type = NULL, columns = 4, pointsize = 2, scales = "fixed") {
 
     base_plot <- function(df, data_type) {
 
-        if(data_type == "SET") {
+        if (data_type == "SET") {
             title_lab <- "Cumulative surface elevation change by "
             y_lab <- "Cumulative surface elevation change (mm) "
             line_color <- "lightsteelblue4"
             smooth_color <- "steelblue4"
             point_fill_color <- "lightsteelblue1"
             point_outline_color <- "steelblue3"
-        } else if(data_type == "MH") {
+        } else if (data_type == "MH") {
             title_lab <- "Cumulative vertical accretion by "
             y_lab <- "Cumulative vertical accretion (mm) "
             line_color <- "indianred4"
@@ -108,15 +119,15 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
             theme_classic()
     }
 
-    if(!is.null(SET_data) & is.null(MH_data)) {
+    if (!is.null(SET_data) & is.null(MH_data)) {
 
         # make sure SET_data is SET data
         data_type <- detect_data_type(SET_data)
 
-        if(data_type != "SET") {
+        if (data_type != "SET") {
             stop(paste0("SET_data must be valid SET data. See 'data requirements' in the documentation for `calc_change_cumu()`."))
         } else {
-            if(level == "station") {
+            if (level == "station") {
 
                 groups <- SET_data %>%
                     calc_change_cumu(., level = "station") %>%
@@ -130,9 +141,9 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     tidyr::unite("grouping", all_of(groups), remove = FALSE) %>%
                     base_plot(., data_type = data_type)
 
-                if(is.null(rate_type)) {
+                if (is.null(rate_type)) {
                     p
-                } else if(rate_type == "linear") {
+                } else if (rate_type == "linear") {
 
                     set_rates <- plot_rate_labels(data = SET_data, level = level, groups = groups, data_type = data_type)
 
@@ -141,7 +152,7 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                         geom_text(data = set_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.2, vjust = 2)
                 }
 
-            } else if(level == "site") {
+            } else if (level == "site") {
 
                 groups <- SET_data %>%
                     calc_change_cumu(., level = "site") %>%
@@ -155,9 +166,9 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     tidyr::unite("grouping", all_of(groups), remove = FALSE) %>%
                     base_plot(., data_type = data_type)
 
-                if(is.null(rate_type)) {
+                if (is.null(rate_type)) {
                     p
-                } else if(rate_type == "linear") {
+                } else if (rate_type == "linear") {
 
                     set_rates <- plot_rate_labels(data = SET_data, level = level, groups = groups, data_type = data_type)
 
@@ -167,15 +178,15 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                 }
             }
         }
-    } else if(is.null(SET_data) & !is.null(MH_data)) {
+    } else if (is.null(SET_data) & !is.null(MH_data)) {
 
         # make sure MH_data is MH data
         data_type <- detect_data_type(MH_data)
 
-        if(data_type != "MH") {
+        if (data_type != "MH") {
             stop(paste0("MH_data must be valid MH data. See 'data requirements' in the documentation for `calc_change_cumu()`."))
         } else {
-            if(level == "station") {
+            if (level == "station") {
 
                 groups <- MH_data %>%
                     calc_change_cumu(., level = "station") %>%
@@ -189,9 +200,9 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     tidyr::unite("grouping", all_of(groups), remove = FALSE) %>%
                     base_plot(., data_type = data_type)
 
-                if(is.null(rate_type)) {
+                if (is.null(rate_type)) {
                     p
-                } else if(rate_type == "linear") {
+                } else if (rate_type == "linear") {
 
                     mh_rates <- plot_rate_labels(data = MH_data, level = level, groups = groups, data_type = data_type)
 
@@ -200,7 +211,7 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                         geom_text(data = mh_rates, aes(x = structure(-Inf, class = "Date"), y = Inf, label = r2p_label), parse = T, hjust = -0.2, vjust = 2)
                 }
 
-            } else if(level == "site") {
+            } else if (level == "site") {
 
                 groups <- MH_data %>%
                     calc_change_cumu(., level = "site") %>%
@@ -214,9 +225,9 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     tidyr::unite("grouping", all_of(groups), remove = FALSE) %>%
                     base_plot(., data_type = data_type)
 
-                if(is.null(rate_type)) {
+                if (is.null(rate_type)) {
                     p
-                } else if(rate_type == "linear") {
+                } else if (rate_type == "linear") {
 
                     mh_rates <- plot_rate_labels(data = MH_data, level = level, groups = groups, data_type = data_type)
 
@@ -226,7 +237,7 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                 }
             }
         }
-    } else if(!is.null(SET_data) & !is.null(MH_data)) {
+    } else if (!is.null(SET_data) & !is.null(MH_data)) {
 
         # make sure SET_data is SET data
         data_type_SET <- detect_data_type(SET_data)
@@ -234,11 +245,11 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
         # make sure MH_data is MH data
         data_type_MH <- detect_data_type(MH_data)
 
-        if(data_type_SET != "SET") {
+        if (data_type_SET != "SET") {
             stop(paste0("SET_data must be a valid SET data frame. See 'data requirements' in the documentation for `calc_change_cumu()`."))
-        } else if(data_type_MH != "MH") {
+        } else if (data_type_MH != "MH") {
             stop(paste0("MH_data must be a valid MH data frame. See 'data requirements' in the documentation for `calc_change_cumu()`."))
-        } else if(data_type_SET != "SET" & data_type_MH != "MH") {
+        } else if (data_type_SET != "SET" & data_type_MH != "MH") {
             stop(paste0("SET_data must be a valid SET data frame and MH_data must be a valid MH data frame. See 'data requirements' in the documentation for `calc_change_cumu()`."))
         } else {
 
@@ -265,7 +276,7 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                 )
             }
 
-            if(level == "station") {
+            if (level == "station") {
 
                 # calculative cumulative change for SET and MH data
                 SET_groups <- SET_data %>%
@@ -280,7 +291,7 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     select(-c(network_code, park_code, site_name, ".rows")) %>%
                     colnames()
 
-                if(identical(SET_groups, MH_groups) == FALSE) {
+                if (identical(SET_groups, MH_groups) == FALSE) {
                     stop(print("SET and MH data must have the same grouping in order to plot them together."))
                 } else {
 
@@ -299,9 +310,9 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     # plot data
                     p <- SET_MH_base_plot(df = plot_df)
 
-                    if(is.null(rate_type)) {
+                    if (is.null(rate_type)) {
                         p
-                    } else if(rate_type == "linear") {
+                    } else if (rate_type == "linear") {
 
                         set_rates <- plot_rate_labels(data = SET_data, level = level, groups = SET_groups, data_type = "SET") %>%
                             mutate(data_type = "SET")
@@ -317,7 +328,7 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     }
                 }
 
-            } else if(level == "site") {
+            } else if (level == "site") {
 
                 # calculative cumulative change for SET and MH data
                 SET_groups <- SET_data %>%
@@ -332,7 +343,7 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     select(-c(network_code, park_code, ".rows")) %>%
                     colnames()
 
-                if(identical(SET_groups, MH_groups) == FALSE) {
+                if (identical(SET_groups, MH_groups) == FALSE) {
                     stop(print("SET and MH data must have the same grouping in order to plot them together."))
                 } else {
 
@@ -351,9 +362,9 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                     # plot data
                     p <- SET_MH_base_plot(df = plot_df)
 
-                    if(is.null(rate_type)) {
+                    if (is.null(rate_type)) {
                         p
-                    } else if(rate_type == "linear") {
+                    } else if (rate_type == "linear") {
 
                         set_rates <- plot_rate_labels(data = SET_data, level = level, groups = SET_groups, data_type = "SET") %>%
                             mutate(data_type = "SET")
