@@ -111,7 +111,7 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
 
         ggplot(df, aes(x = event_date_UTC, y = mean_cumu)) +
             geom_line(color = line_color) +
-            geom_smooth(formula = y~x, se = FALSE, method = "lm", color = smooth_color, linewidth = 1) +
+            # geom_smooth(formula = y~x, se = FALSE, method = "lm", color = smooth_color, linewidth = 1) +
             geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
             geom_point(shape = 21, fill = point_fill_color, color = point_outline_color, size = pointsize, alpha = 0.9) +
             facet_wrap(~grouping, ncol = columns, scales = scales) +
@@ -258,16 +258,17 @@ plot_cumu <- function(SET_data = NULL, MH_data = NULL, level = "station", rate_t
                 suppressWarnings(
                     ggplot(df, aes(x = event_date_UTC, y = mean_cumu, group = data_type)) +
                         geom_line(aes(color1 = data_type)) +
-                        geom_smooth(aes(color2 = data_type), formula = y~x, se = FALSE, method = 'lm', linewidth = 1) +
+                        # geom_smooth(aes(color2 = data_type), formula = y~x, se = FALSE, method = 'lm', linewidth = 1) +
                         geom_errorbar(aes(x = event_date_UTC, ymin = mean_cumu - se_cumu, ymax = mean_cumu + se_cumu)) +
                         geom_point(aes(fill = data_type, color3 = data_type), shape = 21, size = pointsize, alpha = 0.9) +
                         facet_wrap(~grouping, ncol = columns, scales = scales) +
                         ggh4x::scale_listed(scalelist = list(
                             scale_colour_manual(values = c('lightsteelblue4', 'indianred4'), aesthetics = "color1", breaks = c("SET", "MH")),
-                            scale_colour_manual(values = c('steelblue4', 'tomato4'), aesthetics = "color2", breaks = c("SET", "MH")),
+                            # scale_colour_manual(values = c('steelblue4', 'tomato4'), aesthetics = "color2", breaks = c("SET", "MH")),
                             scale_colour_manual(values = c('steelblue3', 'tomato3'), aesthetics = "color3", breaks = c("SET", "MH")),
                             scale_fill_manual(values = c('lightsteelblue1', 'indianred1'), breaks = c("SET", "MH"))
-                        ), replaces = c("color", "color", "color", "fill")) +
+                        # ), replaces = c("color", "color", "color", "fill")) +
+                        ), replaces = c("color", "color", "fill")) +
                         labs(title = paste0('Cumulative surface elevation change and\nvertical accretion by ', level), x = 'Date', y = 'Cumulative surface elevation change and\nvertical accretion (mm)') +
                         theme_classic() +
                         theme(
