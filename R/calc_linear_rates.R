@@ -2,7 +2,7 @@
 #'
 #' This function takes a data frame of raw SET or MH data and calculates a
 #' linear rate of surface elevation change (for SET data) or vertical accretion
-#' (for MH data).
+#' (for MH data) at either the station- or site-level.
 #'
 #' @inheritParams calc_change_cumu
 #'
@@ -52,7 +52,7 @@ calc_linear_rates <- function(data, level = "station"){
     # determine if the data is SET or MH
     data_type <- detect_data_type(data)
 
-    if(data_type != "SET" & data_type != "MH") {
+    if (data_type != "SET" & data_type != "MH") {
         stop(paste0("Data must be either valid SET or MH data. See 'data requirements' in the documentation for `calc_change_cumu()`."))
     } else if (data_type == "SET") {
 
@@ -99,7 +99,7 @@ calc_linear_rates <- function(data, level = "station"){
         return(linear_rates_set)
 
     }
-    else if(data_type == "MH"){
+    else if (data_type == "MH"){
 
         # first calculate cumulative change for each station
         linear_rates_mh <- {if (level == "station")

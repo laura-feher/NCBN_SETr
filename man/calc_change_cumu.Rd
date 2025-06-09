@@ -7,10 +7,10 @@
 calc_change_cumu(data, level = "station")
 }
 \arguments{
-\item{data}{A data frame. A data frame of raw SET or MH data. See details
+\item{data}{data frame. A data frame of raw SET or MH data. See details
 below for requirements.}
 
-\item{level}{A string (optional). Level at which to calculate rates of
+\item{level}{string (optional). Level at which to calculate rates of
 surface elevation change or vertical accretion. One of:
 * `"station"`: (default) station-level rates of surface elevation change.
 * `"site"`: site-level rates of surface elevation change.}

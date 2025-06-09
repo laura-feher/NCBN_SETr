@@ -2,12 +2,12 @@
 % Please edit documentation in R/plot_rate_comps.R
 \name{plot_rate_comps}
 \alias{plot_rate_comps}
-\title{Graphical comparison of station- or site-level surface elevation change rates}
+\title{Plot comparison of station- or site-level surface elevation change or vertical accretion rates}
 \usage{
 plot_rate_comps(data = NULL, rates = NULL, level = "station")
 }
 \arguments{
-\item{data}{A data frame (optional). A data frame of raw SET data. See
+\item{data}{A data frame (optional). A data frame of raw SET or MH data. See
 details below for requirements.}
 
 \item{rates}{A data frame (optional). A data frame of station- or site-level
@@ -19,35 +19,26 @@ surface elevation change. One of:
 * `"site"`: site-level rates of surface elevation change.}
 }
 \value{
-a ggplot object
+a ggplot object: depending on the type of data supplied, x-axis
+  values are rates of either (a) cumulative surface elevation change or (b)
+  vertical accretion. If `level = "station"` (default), the y-axis is station
+  codes. If `level = "site"`, the y-axis is site names.
 }
 \description{
-This function creates a 'TIE fighter' style plot that can be
-  used to visually compare station- or site-level linear rates of surface
-  elevation change.
-
-  Can use a data frame of either raw SET data (`data` argument) or a data
-  frame of pre-calculated station- or site-level rates of surface elevation
-  change (`rates` argument).
+This function creates a 'TIE fighter' style plot that can be used to visually
+compare station- or site-level linear rates of surface elevation change or vertical accretion.
 }
-\section{Data Requirements}{
+\details{
+Accepts either a data frame of either raw SET or MH data (`data` argument) or a
+data frame of pre-calculated station- or site-level rates of surface
+elevation change or vertical accretion (`rates` argument).
+}
+\section{Data Requirements for pre-calculated rates of change}{
 
 
   This function takes a data frame of either raw SET data (`data`) or a
   user-created data frame of station- or site-level rates of surface
   elevation change (`rates`).
-
-  If supplying SET data for `data`, raw SET data must have 1 row per pin
-  reading and the following columns, named exactly: event_date_UTC,
-  network_code, park_code, site_name, station_code, SET_direction,
-  pin_position, SET_offset_mm, pin_length_mm, and pin_height_mm. Note that
-  SET_offset_mm and pin_length_mm can be NA (aka blanks) but the columns must
-  be included in the data frame.
-
-  If supplying MH data for `data`, raw MH data must have 1 row per core
-  measurement and the following columns, named exactly: event_date_UTC,
-  network_code, park_code, site_name, station_code, marker_horizon_name,
-  core_measurement_number, core_measurement_depth_mm, and established_date
 
   If supplying a user created data frame to  `rates` and `level = station`,
   must be a data frame of station-level rates of surface elevation change or
@@ -63,12 +54,51 @@ This function creates a 'TIE fighter' style plot that can be
   represent the site-level rates and their standard errors (respectively).
 }
 
+\section{Data Requirements}{
+
+
+  This function takes a data frame of either raw SET or MH data (`data`).
+
+  SET data must have 1 row per pin reading and the following columns, named
+  exactly: event_date_UTC, network_code, park_code, site_name, station_code,
+  SET_direction, pin_position, SET_offset_mm, pin_length_mm, and
+  pin_height_mm. Note that SET_offset_mm and pin_length_mm can be empty (aka
+  blank) but the columns must be included in the data frame. See
+  `example_sets`.
+
+  MH data must have 1 row per core measurement and the following columns,
+  named exactly: event_date_UTC, network_code, park_code, site_name,
+  marker_horizon_name, core_measurement_number, core_measurement_depth_mm,
+  and established_date. See `example_mh`.
+}
+
+\section{Details}{
+
+
+  For SET data, pin-level cumulative change is first calculated as the
+  difference between each pin reading and the reading from the earliest date
+  that was not NA. Note that for data from NCBN, NCRN, and NETN, pin heights
+  are first converted to standardized pin heights using the formula 1000 +
+  (SET_offset_mm - (pin_length_mm - pin_height_mm)) to account for the 6"
+  extensions that were added to some benchmarks within these networks' parks
+  in 2023/24. Then, cumulative pin changes are averaged to the arm-level on
+  each date, and then the cumulative arm-level changes are averaged up to the
+  station-level on each date. If level = "site" is used, station-level
+  cumulative change will be averaged up to the site-level.
+
+  For MH data, duplicate core readings ('core_measurement_number') are first
+  averaged to the marker horizon-level. Then, average marker horizon depths
+  are averaged up to the station-level on each date, excluding NAs. If level
+  = "site" is used, station-level cumulative change will be averaged up to
+  the site-level.
+}
+
 \section{Note}{
 
 
   Cumulative change is calculated via the function [calc_change_cumu] and
   linear rates of change are calculated via the function [calc_linear_rates].
-  See function documentation for details.
+See function documentation for details.
 }
 
 \examples{

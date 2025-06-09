@@ -7,10 +7,10 @@
 calc_linear_rates(data, level = "station")
 }
 \arguments{
-\item{data}{A data frame. A data frame of raw SET or MH data. See details
+\item{data}{data frame. A data frame of raw SET or MH data. See details
 below for requirements.}
 
-\item{level}{A string (optional). Level at which to calculate rates of
+\item{level}{string (optional). Level at which to calculate rates of
 surface elevation change or vertical accretion. One of:
 * `"station"`: (default) station-level rates of surface elevation change.
 * `"site"`: site-level rates of surface elevation change.}
@@ -24,7 +24,7 @@ For SET data, returns a data frame of station- or site-level rates of
 \description{
 This function takes a data frame of raw SET or MH data and calculates a
 linear rate of surface elevation change (for SET data) or vertical accretion
-(for MH data).
+(for MH data) at either the station- or site-level.
 }
 \note{
 Stations with fewer than 3 measurement dates are excluded from the

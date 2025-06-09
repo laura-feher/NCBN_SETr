@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/laura-feher/NCBN_SETr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/laura-feher/NCBN_SETr/actions/workflows/R-CMD-check.yaml)
+
 <!-- badges: end -->
 
 The goal of SETrNCBN is to simplify the calculation of cumulative rates of surface elevation change and vertical accretion from the National Park Services' Surface Elevation Table (SET) data.
@@ -33,53 +34,132 @@ You can install the development version from [GitHub](https://github.com/) with:
 devtools::install_github("laura-feher/SETrNCBN")
 ```
 
-## Load SET or MH data
+## Primary Functions
 
-Data can be pulled from the NPS I&M SET database using `load_set_data()` for SET data or `load_mh_data()` for MH data. Use the network code (`network_code`) or park code (`park_code`) arguments to filter the data to a specific I&M network(s) or park(s) using the appropriate 4-letter code.
+-   [Load SET or MH data](#load-set-or-mh-data)
+
+    -   [From the most recent NPS I&M SET data package]
+
+    -   [From the NPS I&M SET database]
+
+    -   [From a saved file of raw SET or MH data]
+
+-   [Calculate cumulative change](#calculate-cumulative-change)
+
+-   [Plot cumulative change](#plot-cumulative-change)
+
+-   [Calculate linear rates of change](#calculate-linear-rates-of-change)
+
+-   [Plot and compare rates of change](#plot-and-compare-rates-of-change)
+
+-   [Get park-specific SLR data & rates](#get-park-specific-slr-data-and-rates)
+
+-   [Save SET/MH data, cumulative change, or rates of change to file](#save-setmh-data-cumulative-change-or-rates-of-change-to-file)
+
+-   [Save SLR data & rates to file](#save-slr-data-rates-to-file)
+
+## Load SET or MH data {#load-set-or-mh-data}
+
+The package provides 3 options for downloading SET-MH data and loading it into R:
+
+### From the most recent NPS I&M SET data package
+
+Most users from within NPS will want to get data from the most recent version of the NPS I&M SET data package on DataStore. Use `load_set_data()` to get raw surface elevation table data or `load_mh_data()` to get raw marker horizon data. Use the network code (`network_code`) or park code (`park`) arguments to filter the data to a specific I&M network(s) or park(s) using the appropriate 4-letter code.
 
 ```{r message = FALSE, warning = FALSE}
 library(SETrNCBN)
-library(tidyverse)
 
-set_df <- load_set_data(network_code = "NETN") %>%
-    select(network_code, park_code, site_name, station_code, event_date_UTC, SET_direction, pin_position, pin_height_mm)
+# The `load_` functions utilize the `get_data_package` function from the NPSutils package
 
-head(set_df)
+set_df <- load_set_data(park = "ASIS")
+
+set_df %>%
+    dplyr::select(
+        network_code,
+        park_code,
+        site_name,
+        station_code,
+        event_date_UTC,
+        SET_direction,
+        pin_position,
+        pin_height_mm
+    ) %>%
+    head()
 ```
 
 You can also supply a list of multiple parks or networks:
 
 ```{r message = FALSE, warning = FALSE}
-set_df <- load_set_data(park = c("ASIS", "COLO")) %>%
-    select(network_code, park_code, site_name, station_code, event_date_UTC, SET_direction, pin_position, pin_height_mm)
+set_df <- load_set_data(park = c("ASIS", "COLO"))
 
-head(set_df)
+set_df %>%
+    dplyr::select(
+        network_code,
+        park_code,
+        site_name,
+        station_code,
+        event_date_UTC,
+        SET_direction,
+        pin_position,
+        pin_height_mm
+    ) %>%
+    head()
 ```
 
-Alternatively, if you have your data saved in a csv or xlsx file, you can load it into R by supplying a file path. See `? help(calc_change_cumu)` for required columns and data types if supplying your own data.
+### From the NPS I&M SET database
+
+For those with access to the backend of the NPS I&M SET database, you can use `load_set_data()` or `load_mh_data()` to pull the latest data from database using the `db server` argument. Use the network code (`network_code`) or park code (`park`) arguments to filter the data to a specific I&M network(s) or park(s) using the appropriate 4-letter code.
 
 ```{r message = FALSE, warning = FALSE}
-set_df <- load_set_data(file_path = "./data/example_sets.csv")
+library(SETrNCBN)
+library(tidyverse)
+
+# set_df <- load_set_data(network_code = "NETN", db_server = "example.server")
+
+set_df %>%
+    dplyr::select(
+        network_code,
+        park_code,
+        site_name,
+        station_code,
+        event_date_UTC,
+        SET_direction,
+        pin_position,
+        pin_height_mm
+    ) %>%
+    head()
+```
+
+### From a saved file of raw SET or MH data
+
+Alternatively, if you have your data saved in a csv, xlsx, or xls file, you can load it into R by supplying the file path to the saved data file. See `? help(calc_change_cumu)` for required columns and data types if supplying your own data.
+
+```{r message = FALSE, warning = FALSE}
+set_df <- load_set_data(file_path = here::here("data", "example_sets.csv"))
+# equivalent to file_path = "./data/example_sets.csv"
 
 head(set_df)
 ```
 
-## Calculate cumulative change
+## Calculate cumulative change {#calculate-cumulative-change}
 
-The function `calc_change_cumu()` can be used to calculate station- or site-level cumulative surface elevation change from SET data or vertical accretion from MH data. The resulting data frame has the mean station- or site-level cumulative change for each sampling date.
+The function `calc_change_cumu()` can be used to calculate station- or site-level cumulative surface elevation change from SET data or vertical accretion from MH data. The resulting data frame has the mean station- or site-level cumulative change for each sampling date. See `? help(calc_change_cumu)` for details on how cumulative change is calculated.
 
 ```{r message=FALSE, warning=FALSE}
-
-# station-level rates of change
+# station-level cumulative surface elevation change change
 example_cumu_station <- calc_change_cumu(example_sets, level = "station")
-head(example_cumu_station)
 
-# site-level rates of change
-example_cumu_site <- calc_change_cumu(example_sets, level = "site")
+head(example_cumu_station)
+```
+
+```{r message=FALSE, warning=FALSE}
+# site-level cumulative vertical accretion
+example_cumu_site <- calc_change_cumu(example_mh, level = "site")
+
 head(example_cumu_site)
 ```
 
-## Plotting cumulative change
+## Plot cumulative change {#plot-cumulative-change}
 
 The function `plot_cumu()` can be used to plot station- or site-level cumulative surface elevation change from SET data or vertical accretion from MH data. You can also plot SET data and MH data on the same plot by supplying data frames to both the `SET_data` and `MH_data` arguments.
 
@@ -98,7 +178,7 @@ library(ggh4x)
 plot_cumu(SET_data = example_sets, MH_data = example_mh, columns = 2)
 ```
 
-## Calculate linear rates of change
+## Calculate linear rates of change {#calculate-linear-rates-of-change}
 
 The function `calc_linear_rates()` can be used to calculate simple linear rates of change at the station-or site-level in mm/yr.
 
@@ -108,7 +188,9 @@ station_rates <- calc_linear_rates(example_sets, level = "station")
 station_rates %>%
     dplyr::ungroup() %>%
     dplyr::select(park_code, site_name, station_code, rate, rate_se, rate_level)
+```
 
+```{r message=FALSE, warning=FALSE}
 site_rates <- calc_linear_rates(example_sets, level = "site")
 
 site_rates %>%
@@ -116,7 +198,7 @@ site_rates %>%
     dplyr::select(park_code, site_name, rate, rate_se, rate_level)
 ```
 
-## Visually compare rates of change
+## Plot and compare rates of change {#plot-and-compare-rates-of-change}
 
 The function `plot_rate_comps()` can be used to create 'tie fighter' plots that are helpful for visually comparing rates of surface elevation change or vertical accretion between stations or sites:
 
@@ -135,14 +217,22 @@ example_rates <- data.frame(
            park_code = "ABCD",
            site_name = "Site A") %>%
     group_by(network_code, park_code, site_name, station_code) %>%
-    select(network_code, park_code, site_name, station_code, rate, rate_se)
+    dplyr::select(network_code, park_code, site_name, station_code, rate, rate_se)
 
 plot_rate_comps(rates = example_rates, level = "station")
 ```
 
-## Get park-specific SLR data & rates
+## Get park specific SLR data and rates {#get-park-specific-slr-data-and-rates}
 
-The function `get_sea_level_data()` can be used to get rates of sea-level rise from the NOAA tide gauge that is closest to a specific park. The function returns a list with 2 data frames: 'slr_data' is the relative sea-level data downloaded from the NOAA tides and currents website; 'slr_rate' provides the calculated rate of sea-level rise, standard error of the SLR rate, lower confidence interval, upper, minimum year of data used for calculating SLR, and maximum year of data used for calculating SLR. You can access each data frame in the list using `$` or `[]` notation. 
+The function `get_sea_level_data()` can be used to get rates of sea-level rise from the NOAA tide gauge that is closest to a specific park.
+
+The function returns a list with 2 data frames:
+
+-   'slr_data': the relative sea-level data downloaded from the NOAA tides and currents website
+
+-   'slr_rate': provides the calculated rate of sea-level rise, standard error of the SLR rate, lower confidence interval, upper, and minimum and maximum year of data used for calculating SLR.
+
+Note that you can access each data frame in the list using `$` or `[]` notation.
 
 ```{r message=FALSE, warning=FALSE}
 ASIS_sea_level <- get_sea_level_data("ASIS")
@@ -155,9 +245,43 @@ head(ASIS_sea_level$slr_rate)
 You can also supply a start year and/or end year if you want to limit the calculation of SLR to a specific time frame. This could be useful for calculating a SLR rate from the most recent tidal datum:
 
 ```{r message=FALSE, warning=FALSE}
-ASIS_sea_level_2001_2019 <- get_sea_level_data("ASIS", trend_start_year = 2001, trend_end_year = 2019)
+ASIS_sea_level_2001_2019 <- get_sea_level_data("ASIS",
+                                               trend_start_year = 2001,
+                                               trend_end_year = 2019)
 
 head(ASIS_sea_level_2001_2019$slr_data)
 
 head(ASIS_sea_level_2001_2019$slr_rate)
+```
+
+## Save SET/MH data, cumulative change, or rates of change to file {#save-setmh-data-cumulative-change-or-rates-of-change-to-file}
+
+The function `write_set_mh_data()` can be used to write data to a csv file. Data can be raw SET/MH produced by `load_set_data()`, cumulative change produced by `calc_change_cumu()`, or rates of change produced by `calc_linear_rates()`.
+
+Note that the name of the saved csv will be the name of the data frame supplied to `data` suffixed with the current date. The csv will be saved to the current working directory by default.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo=TRUE}
+write_set_mh_data(data = set_df)
+```
+
+Use the `dest_file` argument to save the csv to a specific location. By default, it will not create folders if the folder location doesn't already exist and it will not overwrite files with the same name. Use `create_folders = TRUE` if you want to save to a folder location that doesn't already exist and use `overwrite = TRUE` if you want to overwrite a file with the same name.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo=TRUE}
+write_set_mh_data(
+    data = set_df,
+    dest_folder = here::here("C:", "Documents", "data"),
+    create_folders = TRUE,
+    overwrite = TRUE
+)
+# this is equivalent to "C:/Documents/SET_data"
+```
+
+## Save SLR data & rates to file {#save-slr-data-rates-to-file}
+
+The function `write_slr_data()` can be used to write the park-specific sea-level data and the rate of sea-level rise produced by `get_sea_level_data()` to separate csv files.
+
+The file names will be the name of the data frame supplied to `data` suffixed with "\_slr_data" or "\_slr_rate" and the current date e.g. "asis_slr_data_2025-06-05.csv" and "asis_slr_rate_2025-06-05.csv". The csv will be saved to the current working directory by default.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo=TRUE}
+write_slr_data(park = "COLO")
 ```
