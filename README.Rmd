@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 
 The goal of SETrNCBN is to simplify the calculation of cumulative rates of surface elevation change and vertical accretion from the National Park Services' Surface Elevation Table (SET) data.
 
-This package is based on the [SETr](https://github.com/swmpkim/SETr) package developed by Kim Cressman.
+This package is based on the [SETr](https://github.com/swmpkim/SETr) package developed by Kim Cressman for the National Estuarine Research Reserve System (https://nerrssciencecollaborative.org/project/Cressman18).
 
 ## Installation
 
