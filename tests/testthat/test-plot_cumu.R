@@ -31,11 +31,10 @@ test_that("plot has expected elements", {
     df <- readr::read_csv(test_path("testdata", "test_raw_SET_data.csv"), col_types = c("ccccccDcciddd"))
     p <- plot_cumu(df, level = "site", rate_type = "linear")
     expect_identical(class(p[["layers"]][[1]][["geom"]])[1], "GeomLine")
-    expect_identical(class(p[["layers"]][[2]][["geom"]])[1], "GeomSmooth")
-    expect_identical(class(p[["layers"]][[3]][["geom"]])[1], "GeomErrorbar")
-    expect_identical(class(p[["layers"]][[4]][["geom"]])[1], "GeomPoint")
+    expect_identical(class(p[["layers"]][[2]][["geom"]])[1], "GeomErrorbar")
+    expect_identical(class(p[["layers"]][[3]][["geom"]])[1], "GeomPoint")
+    expect_identical(class(p[["layers"]][[4]][["geom"]])[1], "GeomText")
     expect_identical(class(p[["layers"]][[5]][["geom"]])[1], "GeomText")
-    expect_identical(class(p[["layers"]][[6]][["geom"]])[1], "GeomText")
 })
 
 # test_that("plot has expected elements", {
