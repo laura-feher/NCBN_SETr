@@ -13,15 +13,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-# SETrNCBN
+# NPSETr
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/laura-feher/NCBN_SETr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/laura-feher/NCBN_SETr/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/laura-feher/NPSETr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/laura-feher/NPSETr/actions/workflows/R-CMD-check.yaml)
 
 <!-- badges: end -->
 
-The goal of SETrNCBN is to simplify the calculation of cumulative rates of surface elevation change and vertical accretion from the National Park Services' Surface Elevation Table (SET) data.
+The goal of NPSETr is to simplify the calculation of cumulative rates of surface elevation change and vertical accretion from the National Park Services' Surface Elevation Table (SET) data.
 
 This package is based on the [SETr](https://github.com/swmpkim/SETr) package developed by Kim Cressman for the National Estuarine Research Reserve System (https://nerrssciencecollaborative.org/project/Cressman18).
 
@@ -31,7 +31,7 @@ You can install the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("laura-feher/SETrNCBN")
+devtools::install_github("laura-feher/NPSETr")
 ```
 
 ## Primary Functions
@@ -67,7 +67,7 @@ The package provides 3 options for downloading SET-MH data and loading it into R
 Most users from within NPS will want to get data from the most recent version of the NPS I&M SET data package on DataStore. Use `load_set_data()` to get raw surface elevation table data or `load_mh_data()` to get raw marker horizon data. Use the network code (`network_code`) or park code (`park`) arguments to filter the data to a specific I&M network(s) or park(s) using the appropriate 4-letter code.
 
 ```{r message = FALSE, warning = FALSE}
-library(SETrNCBN)
+library(NPSETr)
 
 # The `load_` functions utilize the `get_data_package` function from the NPSutils package
 
@@ -111,7 +111,7 @@ set_df %>%
 For those with access to the backend of the NPS I&M SET database, you can use `load_set_data()` or `load_mh_data()` to pull the latest data from database using the `db server` argument. Use the network code (`network_code`) or park code (`park`) arguments to filter the data to a specific I&M network(s) or park(s) using the appropriate 4-letter code.
 
 ```{r message = FALSE, warning = FALSE}
-library(SETrNCBN)
+library(NPSETr)
 library(tidyverse)
 
 # set_df <- load_set_data(network_code = "NETN", db_server = "example.server")

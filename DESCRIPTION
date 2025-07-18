@@ -1,5 +1,5 @@
-Package: SETrNCBN
-Title: Functions for working with NCBN Surface Elevation Table (SET) data
+Package: NPSETr
+Title: Functions for working with NPS I&M Surface Elevation Table (SET) data
 Version: 0.0.0.9001
 Author: 
     person(given = "Laura",
@@ -11,7 +11,7 @@ Author:
            role = c("aut"),
            email = "kim@catbirdstats.com")
 Maintainer: Laura Feher <laura_feher@nps.gov>
-Description: Simplifies calculations and makes graphs for communication of NCBN 
+Description: Simplifies calculations and makes graphs for communication of NPS I&M 
     SET data.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -35,5 +35,5 @@ Imports:
     NPSutils
 Suggests: 
     testthat (>= 2.1.0)
-URL: https://github.com/laura-feher/NCBN_SETr
-BugReports: https://github.com/laura-feher/NCBN_SETr/issues
+URL: https://github.com/laura-feher/NPSETr
+BugReports: https://github.com/laura-feher/NPSETr/issues
